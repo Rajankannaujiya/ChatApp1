@@ -1,0 +1,42 @@
+
+*{
+    margin: 2px;
+    padding: 0;
+}
+
+.Account{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 20px;
+    flex-grow: 1;
+    margin:0 auto;
+    border-radius: 20px;
+    box-shadow: inset 10px 10px 10px -10px aquamarine, inset -10px 10px 10px -10px aquamarine; 
+    border-bottom: aqua;
+}
+
+.Account img{
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 2px solid aqua;
+}
+
+.profile{
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: column;
+    margin: 10px;
+    padding: 5px;
+
+}
+
+input{
+    margin: 5px;
+    padding: 4px;
+    border-radius: 20px;
+    width: 70%;
+}
+
