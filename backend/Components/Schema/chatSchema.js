@@ -1,20 +1,17 @@
-import mongoose from "mongoose";
-
-const messageSchema = new mongoose.Schema({
-  sender: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: true },
-  content: { type: String, required: true },
-  timestamp: { type: Date, default: Date.now }
-});
+import mongoose from 'mongoose';
+// import messageSchema from './Message.js';
 
 const chatSchema = new mongoose.Schema({
   participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: true }],
-  messages: [messageSchema],
-  group: { type: Boolean, default: false } // Indicates whether it's a group chat or not
+  messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message', required: true }],
+  group: { type: Boolean, default: false },
+  isgroupAdmin:{
+    type: mongoose.Schema.Types.ObjectId, ref: 'Users'
+  }
 });
 
 
-// Example group chat
 
-export default mongoose.model('Chat', chatSchema);
+export default mongoose.model('chatSchema', chatSchema);
 
 

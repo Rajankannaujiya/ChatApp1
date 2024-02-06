@@ -17,27 +17,22 @@ function Sidebar() {
     const [conversations,setConversations]=useState([]);
     const [fetUsers,setFetchUser]=useState([]);
        
-useEffect(()=>{
-    Axios.get("/user").then(response=>setConversations(response.data))
-    .catch((err)=>{
-        console.log(err)
-    })
-},[])
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                
+                const response = await Axios.get("http://localhost:5000/user");
+                setConversations(response.data);
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
 
-// const searchUser=useEffect(()=>{
-//     const users=async()=>{
-//         await Axios.get("/chat")
-//                 .then(response => {
-//                     setFetchUser(response.data)
-//                     console.log(response)
-//                 })
-    
-//                 .catch((err) => {
-//                     console.log(err)
-//                 })
-// }
-// users();
-// },[])
+        fetchData();
+
+    }, []);
+
+
 
 if(conversations){
     console.log(conversations)
@@ -85,7 +80,7 @@ if(conversations){
             {
                 conversations?
                  conversations.map((Conversation) => {
-                    return <ConversationItem props={Conversation} key={Conversation.userName} />
+                    return <ConversationItem props={Conversation} key={Conversation.username} />
                 }):"" 
 
             }

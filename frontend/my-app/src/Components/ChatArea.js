@@ -7,6 +7,8 @@ import { IconButton } from "@mui/material";
 import Axios from "axios"
 
 
+
+
 function ChatArea(props){
 
     const [chat, setChat] = useState([]);
@@ -28,9 +30,9 @@ function ChatArea(props){
 
     return (<div className="chatArea-container">
         <div className="chatArea-header">
-            <p className={props.name ? "con-icon" : ""}>{props.name ? props.name[0] : 'R'}</p>
+            <p className={props.username ? "con-icon" : ""}>{props.username ? props.username[0] : 'R'}</p>
             <div className="header-text">
-                <p className={props ? "con-Title" : ""}>{props.name ? props.name : "Rajan"}</p>
+                <p className={props ? "con-Title" : ""}>{props.username  ? props.username  : "Rajan"}</p>
                 <p className="con-timeStamp">{props.timeStamp ? props.timeStamp : "online"}</p>
             </div>
             <IconButton>

@@ -2,6 +2,7 @@ import express, { response } from "express";
 import mongoose from 'mongoose'
 // import expresHandler from "express-async-handler"
 import session from 'express-session';
+import ensureAuthenticated from "./ensureAuthentication.js";
 import Users from "../Schema/Users.js";
 import passport from 'passport'
 import passportLocalMongoose from 'passport-local-mongoose';
@@ -11,15 +12,16 @@ import { Strategy as LocalStrategy } from 'passport-local';
 
 const Router = express.Router();
 
-passport.serializeUser((user,done)=>{
-    done(null,user.id);
-  });
-  passport.deserializeUser((user, done)=> {
-    const fetchUser=(id)=>Users.findById(id);
-    fetchUser(id).then((user)=>{
-        return done(null,user);
-    })
-  });
+// passport.serializeUser((user,done)=>{
+//     done(null,user.id);
+//   });
+//   passport.deserializeUser((user, done)=> {
+//     const fetchUser=(id)=>Users.findById(id);
+//     fetchUser(id)
+//     .then((user)=>{
+//         return done(null,user);
+//     })
+//   });
 
 
 Router.get("/", async (req, res) => {
@@ -27,40 +29,36 @@ Router.get("/", async (req, res) => {
 })
 
 Router.get("/user", async (req, res) => {
-
     Users.find().then(users => res.json(users))
         .catch(err => res.json(err))
 
-
-    // res.send("hii")
 })
 
-Router.get("/fetchAllUsers", async (req, res) => {
-    const keyword = req.query.search ? {
-        // console.log(keyword)
-        $or: [{ userName: { $regex: req.query.search, $options: "i" } },
-        { email: { $regex: req.query.search, $options: "i" } }],
-    } : {};
+Router.get("/fetchAllUsers", ensureAuthenticated, async (req, res) => {
+    try {
+        const keyword = req.query.search ? {
+            $or: [
+                { userName: { $regex: req.query.search, $options: "i" } },
+                { email: { $regex: req.query.search, $options: "i" } }
+            ]
+        } : {};
+
+        const users = await Users.find({ ...keyword, _id: { $ne: req.user._id } });
+        res.send(users);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
 
 
-    const users = await Users.find(keyword)
-        .find({
-            _id: { $ne: req.user_id },
-        })
-    res.send(users)
-})
-
-
-Router.get("/signUp", async (req, res) => {
-    res.send("its the signUp")
-})
 
 Router.get("/chat", async (req, res) => {
-
+console.log()
 })
 
 
-Router.post("/register",function(req, res) {
+Router.post("/register",(req, res)=> {
     const { username, email, password, confirmPassword } = req.body;
 
         if (password !== confirmPassword) {
@@ -76,7 +74,7 @@ Router.post("/register",function(req, res) {
         }
         else{
             passport.authenticate("local")(req,res,function(){
-                res.status(200).send("successful registration")
+                res.status(200).send({message:"successful registration",user:req.user})
             })
         }
       
@@ -105,12 +103,12 @@ Router.post("/login", (req, res) => {
             return res.status(500).send({ message: "Internal server error" });
         }
 
+        
         passport.authenticate("local")(req, res, function () {
-            res.status(200).send({ message: "Successful login" });
+            res.status(200).send({ message: "Successful login" ,user:req.user});
         });
     });
 });
-
 
 
 
