@@ -43,13 +43,15 @@ chatRouter.get('/messages/:chatId', ensureAuthenticated, async (req, res) => {
 chatRouter.post('/messages', ensureAuthenticated, async (req, res) => {
   try {
       // Extract necessary data from request body
-      const { content, chatId } = req.body;
+      const { reciever,content, chatId ,isgroup} = req.body;
       const userId = req.user._id;
 
       // Create a new message
       const message = new Message({
           content,
-          sender: userId
+          reciever,
+          sender: userId,
+          isgroup
       });
 
       // Save the message to the database
@@ -249,22 +251,102 @@ chatRouter.post("/createGroupChat", ensureAuthenticated, async (req, res) => {
 
 
 
-chatRouter.patch("/changeGroupName", async(req,res)=>{
-  const {groupId,userId}=req.body;
-  console.log(req.body);
-  const existingGroup=await group.findOne(groupId);
-  if(userId===group.admin){
-    try{
-      existingGroup.name=req.body.name;   
+chatRouter.patch("/changeGroupName", ensureAuthenticated,async(req,res)=>{
+  const { groupId, userId, name } = req.body; // Destructure groupId, userId, and name from the request body
+
+  try {
+    // Find the existing group by groupId
+    const existingGroup = await group.findById(groupId);
+
+    if (!existingGroup) {
+      return res.status(404).json({ message: 'Group not found' });
     }
-    catch(error){
-      console.log(error);
-      return res.send(error);
+
+    // Check if the userId matches the admin of the group
+    if (userId.toString() === existingGroup.admin.toString()) {
+      // Update the name of the group
+      existingGroup.name = name;
+      
+      // Save the updated group
+      const updatedGroup = await existingGroup.save();
+      
+      // Send the updated group as response
+      return res.status(200).json(updatedGroup);
+    } else {
+      return res.status(403).json({ message: 'You are not authorized to change the group name' });
     }
+  } catch(error) {
+    console.log(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
-})
+});
 
 
+chatRouter.patch("/addMember", async (req, res) => {
+  const { groupId, userId, user } = req.body;
 
+  try {
+    if (!groupId || !userId || !user) {
+      return res.status(400).send("All fields are required");
+    }
+
+    // Find the existing group by groupId
+    const existingGroup = await group.findById(groupId);
+
+    if (!existingGroup) {
+      return res.status(404).send("Group not found");
+    }
+
+    // Check if the user making the request is authorized to add a member
+    if (existingGroup.admin.toString() !== userId) {
+      return res.status(403).send("You are not authorized to add a member to this group");
+    }
+
+    // Add the user to the group's members array
+    existingGroup.members.push(user);
+
+    // Save the updated group
+    await existingGroup.save();
+
+    return res.status(200).send("User has been added to the group");
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal Server Error");
+  }
+});
+
+
+chatRouter.patch("/removeMember", async (req, res) => {
+  const { groupId, userId, user } = req.body;
+
+  try {
+    if (!groupId || !userId || !user) {
+      return res.status(400).send("All fields are required");
+    }
+
+    // Find the existing group by groupId
+    const existingGroup = await group.findById(groupId);
+
+    if (!existingGroup) {
+      return res.status(404).send("Group not found");
+    }
+
+    // Check if the user making the request is authorized to add a member
+    if (existingGroup.admin.toString() !== userId) {
+      return res.status(403).send("You are not authorized to remove a member to this group");
+    }
+
+    // Add the user to the group's members array
+    existingGroup.members.pull(user)
+
+    // Save the updated group
+    await existingGroup.save();
+
+    return res.status(200).send("User has been removed from the group");
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send("Internal Server Error");
+  }
+});
 
 export default chatRouter;
