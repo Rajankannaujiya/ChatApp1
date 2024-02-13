@@ -12,11 +12,9 @@ const ensureAuthenticated = async (req, res, next) => {
       return res.status(400).json({ error: 'User ID not provided in the request' });
     }
 
-    // Find the user by ID
     const foundUser = await Users.findById(userId);
     
     if (!foundUser) {
-      // If user not found, return unauthorized
       return res.status(401).json({ error: 'Unauthorized' });
     }
 

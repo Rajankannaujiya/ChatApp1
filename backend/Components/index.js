@@ -63,11 +63,10 @@ app.use(passport.session());
 
 var User = mongoose.model('Users');
 passport.use(new LocalStrategy(Users.authenticate()));
-// passport.serializeUser(Users.serializeUser());
+
 passport.serializeUser((user,done)=>{
   done(null,user.id);
 });
-// passport.deserializeUser(Users.deserializeUser());
 passport.deserializeUser(async function(id, done) {
   try {
     const user = await User.findById(id);
@@ -82,19 +81,11 @@ passport.deserializeUser(async function(id, done) {
 
 
 
-// passport.deserializeUser(function(user, cb) {
-//   process.nextTick(function() {
-//     return cb(null, user);
-//   });
-// });
-
-
 app.use((req, res, next) => {
   res.locals.isAuthenticated = req.isAuthenticated();
   next();
 });
 
-// Routes
 app.use("/users", Router);
 app.use("/",chatRouter)
 

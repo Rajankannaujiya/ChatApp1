@@ -12,18 +12,6 @@ import { Strategy as LocalStrategy } from 'passport-local';
 
 const Router = express.Router();
 
-// passport.serializeUser((user,done)=>{
-//     done(null,user.id);
-//   });
-//   passport.deserializeUser((user, done)=> {
-//     const fetchUser=(id)=>Users.findById(id);
-//     fetchUser(id)
-//     .then((user)=>{
-//         return done(null,user);
-//     })
-//   });
-
-
 Router.get("/", async (req, res) => {
     res.send("hii its connected");
 })
@@ -51,11 +39,6 @@ Router.get("/fetchAllUsers", ensureAuthenticated, async (req, res) => {
     }
 });
 
-
-
-Router.get("/chat", async (req, res) => {
-console.log()
-})
 
 
 Router.post("/register",(req, res)=> {
