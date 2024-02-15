@@ -8,10 +8,10 @@ import Axios from 'axios';
 
 function OnlineUsers() {
 
-    const [conversations,setConversations]=useState([]);
+    const [onlineUser,setOnlineUser]=useState([]);
        
     useEffect(()=>{
-        Axios.get("http://localhost:5000/user").then(response=>setConversations(response.data))
+        Axios.get("http://localhost:5000/allUser").then(response=>setOnlineUser(response.data))
         .catch((err)=>{
             console.log(err)
         })
@@ -32,8 +32,8 @@ function OnlineUsers() {
             </div>
             <div className='online-User-Container'>
             {
-            conversations.map((Conversation)=>{
-                return<ConversationItem props={Conversation} key={Conversation.name}/>
+            onlineUser.map((onlineUser)=>{
+                return<ConversationItem props={onlineUser} key={onlineUser.name}/>
                 })
 
             }

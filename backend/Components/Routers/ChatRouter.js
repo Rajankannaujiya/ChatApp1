@@ -9,15 +9,69 @@ import Message from '../Schema/Message.js'
 import mongoose from 'mongoose';
 import group from '../Schema/group.js';
 import { ObjectId } from 'mongoose';
-// import group from '../Schema/group.js';
-
 const chatRouter=express.Router()
 
 
+chatRouter.get("/userwithChat", async (req, res) => {
+  try {
+    // Assuming userId is passed as a query parameter
+    const userId = req.body.userId;
+
+    const senders = await chatSchema.distinct('participants');
+
+    // Convert sender objects to user IDs
+    const senderUserIds = senders.map(sender => sender._id);
+
+    // Find users who have sent at least one message
+    const usersWithMessages = await Users.find({ _id:{ $in: senderUserIds } });
+
+    // Return users with messages as JSON response
+    return res.json(usersWithMessages);
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+chatRouter.get("/allUser", async (req, res) => {
+  try {
+    const users = await Users.find();
+
+    // Check if users exist
+    if (users && users.length > 0) {
+      return res.json(users);
+    } else {
+      return res.status(404).json({ message: 'No users found' });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server Error' });
+  }
+});
+
+
+chatRouter.get("/allTheGroups",async(req,res)=>{
+  try {
+    const groups = await group.find();
+
+    // Check if users exist
+    if (groups && groups.length > 0) {
+      return res.json(groups);
+    } else {
+      return res.status(404).json({ message: 'No group found' });
+    }
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Server Error' });
+  }
+})
+
 chatRouter.get('/messages/:chatId', ensureAuthenticated, async (req, res) => {
   try {
-      const { chatId } = req.params;
-      const userId = req.user._id; // Access user ID from middleware
+      const { chatId ,userId} = req.params;
+      // it may be change with the lower commented line
+      // const userId = req.user._id; // Access user ID from middleware
       console.log(chatId);
 
 
@@ -117,9 +171,9 @@ chatRouter.post('/createOrRetrieveChat',ensureAuthenticated,  async (req, res) =
 });
 
 // fetching all the chats
-chatRouter.get("/fetchChats", ensureAuthenticated, async (req, res) => {
+chatRouter.get("/fetchChats",  async (req, res) => {
   try {
-    const userId = req.user._id;
+    const userId = "65ae329bd348dd99252a8654";
 
     const chats = await chatSchema.find({
       participants: userId
@@ -154,7 +208,7 @@ chatRouter.get("/fetchChats", ensureAuthenticated, async (req, res) => {
 });
 
 chatRouter.get("/getGroups", ensureAuthenticated, async (req, res) => {
-  const { name,userId } = req.body; // Assuming name is sent as a query parameter
+  const { name,userId } = req.query; // Assuming name is sent as a query parameter
   console.log(req.body);
   try {
     const existingGroup = await group.findOne({ name }); // Corrected to use findOne() with a query object
@@ -170,6 +224,7 @@ chatRouter.get("/getGroups", ensureAuthenticated, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
 chatRouter.post('/createGroup', ensureAuthenticated, async (req, res) => {
   const { name, users } = req.body;
   const userId = req.user._id;
@@ -188,8 +243,6 @@ chatRouter.post('/createGroup', ensureAuthenticated, async (req, res) => {
     // Convert users to an array if it's not already
     const userIds = JSON.parse(users) 
 
-
-    // Add the current user to the arra
 
     // Create a new group
     const newgroup = new group({
@@ -251,7 +304,7 @@ chatRouter.post("/createGroupChat", ensureAuthenticated, async (req, res) => {
 
 
 
-chatRouter.patch("/changeGroupName", ensureAuthenticated,async(req,res)=>{
+chatRouter.patch("/changeGroupName",ensureAuthenticated,async(req,res)=>{
   const { groupId, userId, name } = req.body; // Destructure groupId, userId, and name from the request body
 
   try {

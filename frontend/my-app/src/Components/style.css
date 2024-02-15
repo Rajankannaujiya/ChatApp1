@@ -1,7 +1,9 @@
 
-.dark{
-    background-color: #2d2d2d;
-}
+.dark {
+    background-color: #2d3941 !important;
+    color: lightgray !important;
+  }
+  
 
 div.mainContainer{
     box-shadow: inset 10px 10px 10px -10px rgb(0 0 0), inset -10px 10px 10px -10px rgb(0 0 0);

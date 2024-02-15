@@ -7,15 +7,13 @@ import { IconButton } from "@mui/material";
 import Axios from "axios"
 
 
-
-
 function ChatArea(props){
 
     const [chat, setChat] = useState([]);
 
     useEffect(() => {
         const chat = async () => {
-            await Axios.get("/chat")
+            await Axios.get("http://localhost:5000/fetchChats")
                 .then(response => {
                     setChat(response.data)
                     console.log(response)

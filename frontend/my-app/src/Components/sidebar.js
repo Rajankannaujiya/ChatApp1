@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 
 import Axios from "axios"
 import ConversationItem from "./ConversationItem";
@@ -13,15 +13,17 @@ import OnlinePredictionIcon from '@mui/icons-material/OnlinePrediction';
 // import individualChatSchema from 'individualChatSchema'
 import { IconButton} from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { myContext } from "./mainContainer";
 function Sidebar() {
     const [conversations,setConversations]=useState([]);
+    const { refresh, setRefresh } = useContext(myContext);
     const [fetUsers,setFetchUser]=useState([]);
        
     useEffect(() => {
         const fetchData = async () => {
             try {
                 
-                const response = await Axios.get("http://localhost:5000/user");
+                const response = await Axios.get("http://localhost:5000/userwithChat");
                 setConversations(response.data);
             } catch (error) {
                 console.error("Error fetching user data:", error);

@@ -6,10 +6,12 @@ import Axios from 'axios'
 function Group() {
 
  
-  const [conversations,setConversations]=useState([]);
+  const [group,setGroup]=useState([]);
        
   useEffect(()=>{
-      Axios.get("http://localhost:5000/user").then(response=>setConversations(response.data))
+      Axios.get("http://localhost:5000/allTheGroups").then((response)=>{
+        console.log(response.data)
+        setGroup(response.data)})
       .catch((err)=>{
           console.log(err)
       })
@@ -24,8 +26,8 @@ function Group() {
       </div>
       <div className="Sb-Conversation">
         {
-            conversations.map((Conversation)=>{
-                return<ConversationItem props={Conversation} key={Conversation.name}/>
+            group.map((group)=>{
+                return<ConversationItem props={group} key={group.name}/>
                 })
 
             }

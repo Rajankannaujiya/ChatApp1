@@ -4,11 +4,11 @@ import mongoose from 'mongoose'
 import session from 'express-session';
 import ensureAuthenticated from "./ensureAuthentication.js";
 import Users from "../Schema/Users.js";
-import passport from 'passport'
+import passport from 'passport';
+import chatSchema from "../Schema/chatSchema.js";
 import passportLocalMongoose from 'passport-local-mongoose';
 import cons from "consolidate";
 import { Strategy as LocalStrategy } from 'passport-local';
-
 
 const Router = express.Router();
 
@@ -16,11 +16,6 @@ Router.get("/", async (req, res) => {
     res.send("hii its connected");
 })
 
-Router.get("/user", async (req, res) => {
-    Users.find().then(users => res.json(users))
-        .catch(err => res.json(err))
-
-})
 
 Router.get("/fetchAllUsers", ensureAuthenticated, async (req, res) => {
     try {
@@ -38,7 +33,6 @@ Router.get("/fetchAllUsers", ensureAuthenticated, async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 
 
 Router.post("/register",(req, res)=> {

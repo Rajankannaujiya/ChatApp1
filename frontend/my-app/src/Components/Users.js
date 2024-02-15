@@ -6,10 +6,10 @@ import Axios from 'axios'
 function Users() {
 
  
-  const [conversations,setConversations]=useState([]);
+  const [users,setUsers]=useState([]);
        
   useEffect(()=>{
-      Axios.get("http://localhost:5000/user").then(response=>setConversations(response.data))
+      Axios.get("http://localhost:5000/allUser").then(response=>setUsers(response.data))
       .catch((err)=>{
           console.log(err)
       })
@@ -23,8 +23,8 @@ function Users() {
 
       <div className="Sb-Conversation">
         {
-          conversations.map((Conversation) => {
-            return <ConversationItem props={Conversation} key={Conversation.name} />
+          users.map((users) => {
+            return <ConversationItem props={users} key={users.name} />
           })
 
         }
