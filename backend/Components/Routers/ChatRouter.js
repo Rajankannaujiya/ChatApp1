@@ -8,11 +8,10 @@ import chatSchema from '../Schema/chatSchema.js';
 import Message from '../Schema/Message.js'
 import mongoose from 'mongoose';
 import group from '../Schema/group.js';
-import { ObjectId } from 'mongoose';
 const chatRouter=express.Router()
 
 
-chatRouter.get("/userwithChat", async (req, res) => {
+chatRouter.get("/userwithChat", ensureAuthenticated,async (req, res) => {
   try {
     // Assuming userId is passed as a query parameter
     const userId = req.body.userId;
@@ -34,7 +33,7 @@ chatRouter.get("/userwithChat", async (req, res) => {
   }
 });
 
-chatRouter.get("/allUser", async (req, res) => {
+chatRouter.get("/allUser",ensureAuthenticated,async (req, res) => {
   try {
     const users = await Users.find();
 
@@ -51,7 +50,7 @@ chatRouter.get("/allUser", async (req, res) => {
 });
 
 
-chatRouter.get("/allTheGroups",async(req,res)=>{
+chatRouter.get("/allTheGroups",ensureAuthenticated,async(req,res)=>{
   try {
     const groups = await group.find();
 
@@ -171,9 +170,9 @@ chatRouter.post('/createOrRetrieveChat',ensureAuthenticated,  async (req, res) =
 });
 
 // fetching all the chats
-chatRouter.get("/fetchChats",  async (req, res) => {
+chatRouter.get("/fetchChats", ensureAuthenticated, async (req, res) => {
   try {
-    const userId = "65ae329bd348dd99252a8654";
+    const userId = req.user._id;
 
     const chats = await chatSchema.find({
       participants: userId

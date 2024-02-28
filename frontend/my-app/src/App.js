@@ -13,12 +13,22 @@ import Group from "./Components/Group";
 import SignUp from "./Components/SignUp";
 import Account from "./Components/Account";
 import Users from "./Components/Users";
+
+import { useDispatch,useSelector } from "react-redux";
 // import { Button } from "@mui/material";
 
 
 
 function App() {
+
+  const dispatch=useDispatch();
+  const lightTheme=useSelector((state)=>state.themekey);
+  
   return (<div className="App">
+
+
+
+
 
     <Routes>
   
@@ -45,6 +55,7 @@ function App() {
 
 
   </div>)
+
 }
 
 export default App;

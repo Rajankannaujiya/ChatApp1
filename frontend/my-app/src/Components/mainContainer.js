@@ -1,38 +1,30 @@
 import React, { createContext, useState } from "react";
-import Sidebar from "./sidebar";
-import WorkArea from "./workArea";
-import Welcome from "./Welcome";
-import CreateGroup from "./CreateGroup";
+import Sidebar from "./sidebar.js";
 import "./style.css";
-import Login from "./Login";
-import SignUp from "./SignUp";
-import OnlineUsers from "./OnlineUsers";
 import { Outlet } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
+// Import the context if needed
 export const myContext = createContext();
 
-function MainContainer(){
-  // const dispatch = useDispatch();
-  const lightTheme = useSelector((state) => state.themeKey);
-    const [refresh,setRefresh]=useState(true);
-    return(<div className="mainContainer">
-        {/* <img src="./WallPaperChatapp"/> */}
+function MainContainer() {
+  const dispatch = useDispatch();
 
-        <myContext.Provider value={{ refresh: refresh, setRefresh: setRefresh }}>
-        <Sidebar />
-        <Outlet />
+  // Access the themekey state from Redux store
+  const lightTheme = useSelector(state => state.themekey);
+
+  // Example of using local state
+  const [refresh, setRefresh] = useState(true);
+
+  return (
+<div className={"mainContainer" + (lightTheme ? "" : " dark")}>
+
+      <myContext.Provider value={{ refresh: refresh, setRefresh: setRefresh }}>
+      <Sidebar />
+      <Outlet />
       </myContext.Provider>
-        {/* <Sidebar/> */}
-        {/* <WorkArea/> */}
-        {/* <Outlet /> */}
-        {/* <OnlineUsers/> */}
-        {/* <Welcome/> */}
-        {/* <CreateGroup/> */}
-        {/* <OnlineUsers/> */}
-        {/* <Login/> */}
-        {/* <SignUp/> */}
-    </div>)
+    </div>
+  );
 }
 
 export default MainContainer;

@@ -1,15 +1,14 @@
-import cons from "consolidate";
 import Users from "../Schema/Users.js";
 import passport from "passport";
 
 const ensureAuthenticated = async (req, res, next) => {
-  // Extract the user ID from the request
-  const userId = req.body.userId; // Assuming userId is passed in the request body
+  // Extract the user ID from the request query parameters
+  const userId = req.query.userId; // Assuming userId is passed as a query parameter
   
   try {
     // Check if userId is present
     if (!userId) {
-      return res.status(400).json({ error: 'User ID not provided in the request' });
+      return res.status(400).json({ error: 'User ID not provided in the request query parameters' });
     }
 
     const foundUser = await Users.findById(userId);
@@ -27,7 +26,4 @@ const ensureAuthenticated = async (req, res, next) => {
   }
 };
 
-
-
 export default ensureAuthenticated;
-

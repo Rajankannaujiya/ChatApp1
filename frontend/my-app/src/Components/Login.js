@@ -1,16 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import './LoginSignUp.css';
 import googleLogo from './google.png';
 import githubLogo from './github.png';
+import Toaster from './Toaster';
 // import { Route, redirect } from 'react-router-dom';
 import Axios from 'axios';
+import { Backdrop, CircularProgress } from "@mui/material";
+// or
+// import { Backdrop } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
 
 
 function Login() {
     const navigate = useNavigate();
-    const [islogin, setIslogin] = useState(false)
+
+    const [islogin, setIslogin] = useState("");
+    const [loading,setLoading]=useState(false);
 
     const [user, setUser] = useState({
         username:"",
@@ -26,15 +32,29 @@ function Login() {
     }
 
     var postLoginData = async (event) => {
+        event.preventDefault();
+        setLoading(true)
         try {
-            event.preventDefault();
-            const {username, email, password } = user;
-            await Axios.post('http://localhost:5000/login', {username, email, password }).then((response)=>{
-                console.log(response.data); 
-            navigate("/app/welcome");
+          
+        
+            // const {username, email, password } = user;
+            const config={
+                header:{
+                    "Content-type": "application/json",
+                }
+            }
+            await Axios.post('http://localhost:5000/login', user,config).then((response)=>{
+                console.log("Login:",response.data);
+                setIslogin({msg:"success", key:Math.random()})
+                setLoading(false);
+                localStorage.setItem("userData", JSON.stringify(response.data)); // Use response.data instead of just response
+                console.log("response==", localStorage.getItem("userData")); // Retrieve the data from localStorage
+                navigate("/app/welcome");
             })
             
         } catch (error) {
+            setIslogin({msg:"Invalid username or password", key:Math.random()})
+            setLoading(false);
             console.error("Error during login:", error);
         }
     };
@@ -45,8 +65,14 @@ function Login() {
 
 
     return (
+        <>
+    
+        <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}>
+        <CircularProgress color="primary" />
+      </Backdrop>
         <div className='login'>
-
             <div className='form-container'>
                 <form  method="POST">
 
@@ -92,8 +118,13 @@ function Login() {
                 </div>
                 <button className="button"><a href='/'>SignUp</a></button>
             </div>
+            {islogin ? (
+              <Toaster key={islogin.key} message={islogin.msg} />
+            ) : null}
 
         </div>
+              
+        </>
     )
 }
 

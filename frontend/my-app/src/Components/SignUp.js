@@ -4,10 +4,14 @@ import googleLogo from './google.png';
 import githubLogo from './github.png';
 import Axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-// import { useNavigate } from 'react-router-dom';
+import { Backdrop, CircularProgress } from "@mui/material";
+import Toaster from './Toaster';
 
 function SignUp() {
     const navigate = useNavigate();
+
+    const [loading,setLoading]=useState(false);
+    const [signUpStatus,setSignUpStatus]=useState("");
 
     const [users, setUsers] = useState({
         username: "",
@@ -28,11 +32,12 @@ function SignUp() {
 
     const postData = async (event) => {
         event.preventDefault();
+        setLoading(true)
     
         const { username, email, password, confirmPassword } = users;
     
         try {
-            const response = await Axios.post('http://localhost:5000/register', {
+            await Axios.post('http://localhost:5000/register', {
                 username,
                 email,
                 password,
@@ -41,12 +46,18 @@ function SignUp() {
                 headers: {
                     'Content-Type': 'application/json'
                 }
-            });
-    
-            console.log(response.data);
-            navigate("/app/welcome");
+            }).then((response)=>{
+                console.log("registered:",response.data);
+                setSignUpStatus({msg:"success", key:Math.random()})
+                setLoading(false);
+                localStorage.setItem("userData", JSON.stringify(response.data)); // Use response.data instead of just response
+                console.log("response==", localStorage.getItem("userData")); // Retrieve the data from localStorage
+                navigate("/app/welcome");
+            })
+            
         } catch (error) {
-            console.error("Error:", error);
+            setSignUpStatus({msg:"user with the given username or email already exists", key:Math.random()})
+            setLoading(false);
             console.log("Response data:", error.response ? error.response.data : undefined);
             console.log("Response status:", error.response ? error.response.status : undefined);
         }
@@ -54,6 +65,15 @@ function SignUp() {
     
 
     return (
+
+        <>
+
+        <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}>
+        <CircularProgress color="primary" />
+      </Backdrop>
+
         <div className='SignUp'>
 
             <div className='form-container'>
@@ -105,8 +125,12 @@ function SignUp() {
                 </div>
                 <button className="button"><a href='/Login'>Login</a></button>
             </div>
-
+            {signUpStatus ? (
+              <Toaster key={signUpStatus.key} message={signUpStatus.msg} />
+            ) : null}
         </div>
+             
+        </>
     )
 }
 

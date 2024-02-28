@@ -35,16 +35,23 @@ Router.get("/fetchAllUsers", ensureAuthenticated, async (req, res) => {
 });
 
 
-Router.post("/register",(req, res)=> {
+Router.post("/register",async(req, res)=> {
     const { username, email, password, confirmPassword } = req.body;
 
         if (password !== confirmPassword) {
         return res.status(401).send('Passwords do not match');
     }
+    const existingUser = await Users.findOne({ email });
+    const existingUserName = await Users.findOne({ username });
+
+    if(existingUser || existingUserName){
+        return res.status(401).send('user with the given username or email already exists');
+    }
     var user = {
         username: username,
         email:email,
     };
+
     Users.register(new Users(user), req.body.password, function(err, user) {
         if (err) {
             return res.status(401).send("register", {info: "Sorry. That username already exists. Try again."});
