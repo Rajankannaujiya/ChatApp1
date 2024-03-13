@@ -4,7 +4,13 @@ import mongoose from 'mongoose';
 const chatSchema = new mongoose.Schema({
   participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: true }],
   messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message', required: true }],
-  group: { type: Boolean, default: false },
+  group: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Group' // Reference to the Group model
+  },
+  isgroup:{
+    type:Boolean ,default:false
+  },
   isgroupAdmin:{
     type: mongoose.Schema.Types.ObjectId, ref: 'Users'
   }

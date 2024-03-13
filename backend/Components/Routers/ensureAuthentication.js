@@ -1,5 +1,5 @@
 import Users from "../Schema/Users.js";
-import passport from "passport";
+
 
 const ensureAuthenticated = async (req, res, next) => {
   // Extract the user ID from the request query parameters

@@ -3,6 +3,7 @@ import Sidebar from "./sidebar.js";
 import "./style.css";
 import { Outlet } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { ChatIdProvider } from "../context/contexProvider.js";
 
 // Import the context if needed
 export const myContext = createContext();

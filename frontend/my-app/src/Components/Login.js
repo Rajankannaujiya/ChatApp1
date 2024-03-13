@@ -44,11 +44,11 @@ function Login() {
                 }
             }
             await Axios.post('http://localhost:5000/login', user,config).then((response)=>{
-                console.log("Login:",response.data);
+                // console.log("Login:",response.data);
                 setIslogin({msg:"success", key:Math.random()})
                 setLoading(false);
                 localStorage.setItem("userData", JSON.stringify(response.data)); // Use response.data instead of just response
-                console.log("response==", localStorage.getItem("userData")); // Retrieve the data from localStorage
+                // console.log("response==", localStorage.getItem("userData")); // Retrieve the data from localStorage
                 navigate("/app/welcome");
             })
             

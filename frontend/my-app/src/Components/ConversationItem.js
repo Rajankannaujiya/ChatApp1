@@ -1,16 +1,21 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Axios from "axios";
+
+import { Backdrop, CircularProgress } from "@mui/material";
+
 
 function ConversationItem({ props }) {
+  console.log("groups are in con",props)
   const navigate = useNavigate();
 
   // Check if props is defined and contains the necessary properties
   if (!props || (!props.username && !props.name)) {
-    return null; 
+    return null;
   }
 
   return (
-    <div onClick={() => {navigate('chat')}} className="Conversation-Container">
+    <div onClick={() => { navigate(`chat/:_id`) }} className="Conversation-Container">
       <div>
         {/* Render either username or name */}
         <p className="con-icon">
