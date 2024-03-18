@@ -27,8 +27,7 @@ function Sidebar() {
   const [Conversations, setConversation] = useState([]);
 
   const userData = JSON.parse(localStorage.getItem("userData"));
-  const [fetchUsers, setFetchUser] = useState(null);
-  const [group, setGroup] = useState([]);
+
 
   useEffect(() => {
     const fetchChats = async () => {
@@ -103,10 +102,10 @@ function Sidebar() {
       <input type="search" placeholder="Searchs" className="search-box"></input>
     </div>
     <div className={"Sb-Conversation" + (lightTheme ? "" : " dark")}>
-      {Conversations.map((conversation, index) => {
-        if (conversation.participants && conversation.participants.length ==2) {
+    {Conversations.map((conversation, index) => {
+          
           if (conversation.isgroup === false) {
-
+            console.log("conversation are this one",conversation)
             if (conversation.messages.length === 0) {
               console.log("No Latest Message with ", conversation.participants[1].username);
               return (
@@ -180,15 +179,15 @@ function Sidebar() {
                       {conversation?.participants[1].username}
                     </p>
                     {/* Render last message if available */}
-                    {conversation.messages && conversation.messages.length > 1 && (
+                    {conversation.messages && conversation.messages.length >= 1 && (
                       <p className="con-lastMessage">
-                        {conversation.messages[0].content}
+                        {conversation.messages[conversation.messages.length-1].content}
                       </p>
                     )}
                   </div>
                   <div>
-                    {conversation.messages && conversation.messages.length > 1 && (
-                      <p className="con-timeStamp">{new Date(conversation.messages[0].timestamp).toLocaleDateString()}</p>
+                    {conversation.messages && conversation.messages.length >= 1 && (
+                      <p className="con-timeStamp">{new Date(conversation.messages[conversation.messages.length-1].timestamp).toLocaleDateString()}</p>
                     )}
                   </div>
                 </div>
@@ -196,7 +195,8 @@ function Sidebar() {
               );
             }
           }
-          else if (conversation.isgroup === true && conversation.group?.name) {
+          else if (conversation.isgroup && conversation.group?.name) {
+            console.log("group conversation is this one", conversation);
             if (conversation.messages.length === 0) {
               console.log("No Latest Message with ", conversation.group?.name);
               return (
@@ -257,25 +257,23 @@ function Sidebar() {
                       {conversation ? conversation.group?.name : ""}
                     </p>
                     {/* Render last message if available */}
-                    {conversation.messages && conversation.messages.length > 1 && (
+                    {conversation.messages && conversation.messages.length >= 1 && (
                       <p className="con-lastMessage">
-                        {conversation.messages[0].content}
+                        {conversation.messages[conversation.messages.length-1].content}
                       </p>
                     )}
 
                   </div>
                   <div>
-                    {conversation.messages && conversation.messages.length > 1 && (
-                      <p className="con-timeStamp">{new Date(conversation.messages[0].timestamp).toLocaleDateString()}</p>
+                    {conversation.messages && conversation.messages.length >= 1 && (
+                      <p className="con-timeStamp">{new Date(conversation.messages[conversation.messages.length-1].timestamp).toLocaleDateString()}</p>
                     )}
                   </div>
                 </div>
               );
             }
           }
-        }
       })}
-
       <IconButton style={{ backgroundColor: 'aqua' }} className="online-icon" onClick={() => { navigate('onlineUsers') }}>
         <OnlinePredictionIcon />
       </IconButton>

@@ -18,6 +18,7 @@ admin:{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Users' // Assuming you have a User model
   }],
+  messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message', required: true }],
   created_at: {
     type: Date,
     default: Date.now

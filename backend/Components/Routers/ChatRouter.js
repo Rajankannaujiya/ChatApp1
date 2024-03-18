@@ -10,7 +10,6 @@ import mongoose from 'mongoose';
 import group from '../Schema/group.js';
 const chatRouter=express.Router()
 
-
 chatRouter.get("/userwithChat", ensureAuthenticated,async (req, res) => {
   try {
     // Assuming userId is passed as a query parameter
@@ -66,41 +65,67 @@ chatRouter.get("/allTheGroups",ensureAuthenticated,async(req,res)=>{
   }
 })
 
-chatRouter.get('/messages/:chatId',ensureAuthenticated, async (req, res) => {
+chatRouter.get('/messages/:chatId', ensureAuthenticated, async (req, res) => {
   try {
-      const userId=req.user._id;
-      const { chatId} = req.params;
+    const userId = req.user._id;
+    const { chatId } = req.params;
 
-      // Check if chatId is a valid ObjectId
-      if (!mongoose.isValidObjectId(chatId)) {
-          return res.status(400).json({ error: 'Invalid chatId' });
+    // Check if chatId is a valid ObjectId
+    if (!mongoose.isValidObjectId(chatId) || !mongoose.isValidObjectId(userId)) {
+      return res.status(400).json({ error: 'Invalid chatId' });
+    }
+
+    // Find the chat based on the provided chatId
+    const chat = await chatSchema.findOne({ _id: chatId }).populate('messages');
+
+    // Check if chat exists
+    if (!chat) {
+      return res.status(404).json({ error: 'Chat not found' });
+    }
+
+    // If it's a group chat
+    if (chat.isgroup) {
+      // Check if the user is a participant in the group chat
+      const isParticipant = chat.participants.some(participant => participant.equals(userId));
+      if (!isParticipant) {
+        return res.status(403).json({ error: 'You are not a participant in this group chat' });
       }
 
-      // Find the chat based on the provided chatId and user ID
-      const chat = await chatSchema.findOne({ _id: chatId, participants: userId }).populate('messages');
-      if (!chat) {
-          return res.status(404).json({ error: 'Chat not found' });
-      }
+      // Return group chat messages
+      return res.status(200).json({ messages: chat.messages });
+    }
 
-      res.status(200).json({ messages: chat.messages });
+    // If it's a one-on-one chat
+    // Check if the user is part of this chat
+    if (!chat.participants.includes(userId)) {
+      return res.status(403).json({ error: 'You are not a participant in this chat' });
+    }
+
+   
+    return res.status(200).json({ messages: chat.messages });
+
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal server error' });
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
 
 chatRouter.post('/messages',ensureAuthenticated,  async (req, res) => {
   try {
       // Extract necessary data from request body
       const { reciever,content, chatId ,isgroup} = req.body;
       const userId = req.user._id;
+      console.log(userId)
 
+      console.log(req.body)
       // Create a new message
       const message = new Message({
-          content,
-          reciever,
           sender: userId,
-          isgroup
+          reciever:reciever,
+          content:content,
+          isgroup:isgroup
       });
 
       // Save the message to the database
@@ -108,6 +133,7 @@ chatRouter.post('/messages',ensureAuthenticated,  async (req, res) => {
 
       // Update the chat schema to include the message
       const chat = await chatSchema.findById(chatId);
+      console.log("chat in message is ",chat)
       if (!chat) {
           return res.status(404).json({ error: 'Chat not found' });
       }
@@ -125,13 +151,17 @@ chatRouter.post('/messages',ensureAuthenticated,  async (req, res) => {
 
 
 
+
+
 // Route handler for createOrRetrieveChat
+
+// for the one on one chat
 chatRouter.post('/createOrRetrieveChat/:recieverId', ensureAuthenticated, async (req, res) => {
   try {
 
     const {recieverId} = req.params;
     const userId=req.user._id;
-    console.log(userId)
+    console.log(userId,recieverId)
 
     if (!mongoose.isValidObjectId(recieverId)) {
       return res.status(400).json({ error: 'Invalid chatId' });
@@ -209,51 +239,27 @@ chatRouter.get("/fetchChats", ensureAuthenticated, async (req, res) => {
   }
 });
 
-// chatRouter.get("/fetchChats", ensureAuthenticated, async (req, res) => {
-//   try {
-//     const userId = req.query.userId;
 
-//     const chats = await chatSchema.find({
-//       participants: userId
-//     })
-//     .populate({
-//       path: 'participants',
-//       model: 'Users', // Model name should match the imported model name
-//       select: '-password'
-//     })
-//     .populate({
-//       path: 'isgroupAdmin',
-//       model: 'Users', // Model name should match the imported model name
-//       select: '-password'
-//     })
-//     .populate('messages')
-//     .populate('groupId') // Populate the group
-//     .sort({ updatedAt: -1 });
-
-//     // Populate message sender details
-//     for (let chat of chats) {
-//       await chat.populate({
-//         path: 'messages.sender',
-//         model: 'Users', // Model name should match the imported model name
-//         select: 'name email'
-//       }).execPopulate();
-//     }
-
-//     res.status(200).json({ chats });
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: 'Internal Server Error' });
-//   }
-// });
 
 chatRouter.get("/getGroups", ensureAuthenticated, async (req, res) => {
-  const { chatId,userId } = req.query; // Assuming name is sent as a query parameter
-  console.log(chatId,userId);
+  const { chatId, userId } = req.query; // Assuming name is sent as a query parameter
+  console.log(chatId, userId);
   try {
     const existingGroup = await group.findOne({ chatId }); // Corrected to use findOne() with a query object
     if (existingGroup) {
+      const chat = await chatSchema.findById(chatId)
+        .populate('participants', '-password')
+        .populate({
+          path: 'group',
+          model: 'Group',
+          select: '-password'
+        })
+        .populate('messages', '-password')
+        .populate("isgroupAdmin", "-password");
+
       console.log("Group already exists");
-      return res.send(existingGroup);
+
+      return res.send(chat);
     } else {
       console.log("Group not found");
       return res.status(404).json({ message: "Group not found" });
@@ -264,12 +270,14 @@ chatRouter.get("/getGroups", ensureAuthenticated, async (req, res) => {
   }
 });
 
+
 chatRouter.post('/createGroup', ensureAuthenticated, async (req, res) => {
-  const { name, users } = req.body;
+  const { name, input } = req.body;
+  console.log(name,input)
   const userId = req.user._id;
 
   try {
-    if (!name || !userId || !users || (Array.isArray(users) && users.length < 2)) {
+    if (!name || !userId || !input || (Array.isArray(input) && input.length < 2)) {
       return res.status(400).json({ message: "Please provide group name, content, and at least two users" });
     }
 
@@ -279,14 +287,21 @@ chatRouter.post('/createGroup', ensureAuthenticated, async (req, res) => {
       return res.status(400).json({ message: 'Group with this name already exists' });
     }
 
-    // Convert users to an array if it's not already
-    const userIds = JSON.parse(users) 
 
-    for (const id of users) {
-      if (mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: 'Invalid user ID' });
-      }
+    let userIds = input; // Assuming input is already an array of user IDs
+    if (typeof input === 'string') {
+      userIds = JSON.parse(input);
     }
+
+    for (const id of userIds) {
+      if(!mongoose.Types.ObjectId.isValid(id)){
+        
+          return res.status(400).json({ message: 'Invalid user ID' });
+        
+      }
+     
+    }
+
     // Create a new group
     const newgroup = new group({
       name,
@@ -311,6 +326,7 @@ chatRouter.post('/createGroup', ensureAuthenticated, async (req, res) => {
         model: 'Group',
         select: '-password'
       })
+      .populate('messages','-password')
       .populate("isgroupAdmin", "-password");
 
     res.status(201).json({ savedGroup, fullChat }); // Return an object with both savedGroup and fullChat
@@ -321,45 +337,51 @@ chatRouter.post('/createGroup', ensureAuthenticated, async (req, res) => {
 
 
 
+// creating the group chat
 
 chatRouter.post("/createGroupChat/:groupId", ensureAuthenticated, async (req, res) => {
   const { groupId } = req.params;
-  const userId=req.user._id;
+  const userId = req.user._id;
 
   try {
-    // You need to await the findOne method as it returns a promise
+    // Find the existing group by groupId
     const existingGroup = await group.findOne({ _id: groupId });
-    
+
     if (existingGroup) {
-      // Since existingGroup is an object, you need to access its members property directly
-      const chat = await chatSchema.create({
-        participants: existingGroup.members,
-        isgroup: true,
-        group: existingGroup._id 
-      });
-      const fullChat = await chatSchema.findById({_id:chat._id})
-      .populate('participants', '-password')
-      .populate({
-        path: 'group',
-        model: 'Group',
-        select: '-password'
-      })
-      .populate({
-        path: 'messages',
-        model: 'Message',
-        select: '-password'
-      })
-      .populate('isgroupAdmin', '-password');
-      return res.status(201).json({ fullChat }); 
- // Return the created chat
+      // Find the chat based on the groupId
+      const chat = await chatSchema.findOne({ group: groupId });
+
+      if (chat) {
+        // If chat exists for the group, return it
+        const fullChat = await chatSchema.findById(chat._id)
+          .populate('participants', '-password')
+          .populate('group', '-password')
+          .populate('messages', '-password')
+          .populate('isgroupAdmin', '-password');
+        return res.status(200).json({ fullChat });
+      } else {
+        // If chat doesn't exist for the group, create a new one
+        const newChat = await chatSchema.create({
+          participants: existingGroup.members,
+          isgroup: true,
+          group: existingGroup._id
+        });
+        const fullChat = await chatSchema.findById(newChat._id)
+          .populate('participants', '-password')
+          .populate('group', '-password')
+          .populate('messages', '-password')
+          .populate('isgroupAdmin', '-password');
+        return res.status(201).json({ fullChat });
+      }
     } else {
-      return res.status(404).json({ message: "Group not found" }); // Handle case where group doesn't exist
+      return res.status(404).json({ message: "Group not found" });
     }
   } catch (error) {
-    console.error(error); // Log the error for debugging purposes
-    return res.status(500).json({ message: "Internal server error" }); // Return an error response
+    console.error(error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 });
+
 
 
 

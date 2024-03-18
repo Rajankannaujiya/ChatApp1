@@ -7,7 +7,6 @@ import { IconButton } from "@mui/material";
 import Axios from "axios";
 import { myContext } from "./mainContainer";
 import { useLocation } from "react-router-dom";
-import { toggleTheme } from "../Features/themeSlice";
 import { useSelector, useDispatch } from "react-redux";
 
 function ChatArea(props) {
@@ -16,11 +15,13 @@ function ChatArea(props) {
     const lightTheme = useSelector((state) => state.themekey)
 
     const messagesEndRef = useRef(null);
-    const [chat, setChat] = useState(null);
-
+    const [chat, setChat] = useState([]);
+    const [users, setUsers] = useState([]);
 
     const userData = JSON.parse(localStorage.getItem("userData"));
     const [allMessages, setAllMessages] = useState([]);
+    const { refresh, setRefresh } = useContext(myContext);
+    const [messageContent, setMessageContent] = useState([]);
     const location = useLocation();
     const { pathname } = location;
     const decodedUrl = decodeURIComponent(pathname);
@@ -30,6 +31,28 @@ function ChatArea(props) {
     var [chatId, user] = lastPart.split("&");
 
 
+    
+
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Make the GET request with Axios, passing the request body
+                const response = await Axios.get("http://localhost:5000/allUser", {
+                    params: { userId: userData.user._id }
+                });
+                console.log("Data refresh in sidebar ", response.data);
+                setUsers(response.data);
+
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                // Handle error
+            }
+        };
+
+        fetchData();
+    }, [refresh, userData.user._id]);
+
     useEffect(() => {
         const fetchChats = async () => {
             // setLoading(true);
@@ -37,9 +60,9 @@ function ChatArea(props) {
                 const response = await Axios.get("http://localhost:5000/fetchChats", {
                     params: { userId: userData.user._id }
                 });
-                setChat(response.data);
+                setChat(response.data.chats);
                 // setLoading(false);
-                console.log("chats are", response.data);
+                console.log("chats are", response.data.chats);
             } catch (err) {
                 console.log("Error fetching chats:", err);
             }
@@ -51,8 +74,9 @@ function ChatArea(props) {
         const fetchData = async () => {
             try {
                 console.log("chat id is", chatId);
-                const response = await Axios.get(`http://localhost:5000/messages/${chatId}`, { params: { userId: userData.user._id } });
+                const response = await Axios.get(`http://localhost:5000/messages/${chatId}?userId=${userData.user._id}`);
                 setAllMessages(response.data.messages);
+                console.log("messages are", response.data.messages)
             } catch (error) {
                 console.error('Error fetching messages:', error);
             }
@@ -61,9 +85,47 @@ function ChatArea(props) {
         if (chatId) {
             fetchData();
         }
-    }, [chatId]);
+    }, [chatId,userData.user._id]);
 
+    const handleMessageContentSubmit = async (event) => {
+        try {
+            // Find the chat with matching chatId
+            const chatToUpdate = chat.find(chatItem => chatItem._id === chatId);
+    
+            if (!chatToUpdate) {
+                console.error("Chat not found for chatId:", chatId);
+                return;
+            }
+    
+            const isgroup = chatToUpdate.isgroup;
+    
+            let receiver;
+            if (isgroup) {
+                // Handle group chat
+                receiver = chatToUpdate.participants.map(participant => participant._id);
+            } else {
+                // Handle direct message
+                const receiverDetail = users.find(receiver => receiver.username === user);
+                receiver = receiverDetail ? receiverDetail._id : null;
+            }
+    
+            const { data } = await Axios.post(`http://localhost:5000/messages?userId=${userData.user._id}`, {
+                reciever: receiver,
+                content: messageContent,
+                chatId: chatId,
+                isgroup: isgroup
+            });
+    
+            console.log("Message data:", data);
 
+            setAllMessages([...allMessages, data]);
+            setMessageContent("");
+            // Handle response from backend as needed
+        } catch (error) {
+            console.error("An error occurred while sending the message:", error);
+            // Handle error, e.g., show an error message to the user
+        }
+    };
 
 
 
@@ -88,7 +150,7 @@ function ChatArea(props) {
         <div className={"message-container" + (lightTheme ? "" : " dark")}>
             {allMessages
                 .slice(0)
-                .reverse()
+
                 .map((message, index) => {
                     const sender = message.sender;
                     console.log("sender", sender)
@@ -98,30 +160,54 @@ function ChatArea(props) {
                         return <div className="self-message-container" key={index}>
                             <div className="messageBox">
                                 <div className="self-text-content">
-                                    <p className="con-Title">{userData.user.username}</p> {/* Render sender ID directly */}
+                                    <p className="con-Title">{userData.user.username}</p>
                                     <p className="con-self-lastMessage">{message?.content}</p>
-                                    <p className="self-timeStamp">{new Date(message?.timestamp).toLocaleDateString()}</p>
+                                    {message.timestamp ? (
+                                        <p className="self-timeStamp">{new Date(message.timestamp).toLocaleDateString()}</p>
+                                    ) : (
+                                        <p className="self-timeStamp"> now</p>
+                                    )}
                                 </div>
                             </div>
                         </div>
-                    } else {
+                    }
+
+                    else {
                         // console.log("Someone Sent it");
                         return (<div className="other-message-container" key={index}>
                             <div className="conversation-container">
-                                <p className="con-icon">     {message?.sender}</p>
+                                <p className="con-icon">     {message ? user[0] : ""}</p>
                                 <div className="other-text-content">
-                                    <p className="con-Title">{message?.sender}</p>
-                                    <p className="con-lastMessage">{message?.content}</p>
-                                    <p className="self-timeStamp">{new Date(message?.timestamp).toLocaleDateString()}</p>
+                                    <p className="con-Title">{message ? user : ""}</p>
+                                    <p className="con-lastMessage">{message ? message.content : ""}</p>
+                                    {message.timestamp ? (
+                                        <p className="self-timeStamp">{new Date(message.timestamp).toLocaleDateString()}</p>
+                                    ) : (
+                                        <p className="self-timeStamp"> now</p>
+                                    )}
                                 </div>
                             </div>
                         </div>)
                     }
                 })}
         </div>
+        <div ref={messagesEndRef} className="BOTTOM" />
         <div className={"text-input-area" + (lightTheme ? "" : " dark")}>
-            <input placeholder="Type message" className="search-box"></input>
-            <IconButton>
+            <input placeholder="Type message" className="search-box" value={messageContent}
+                onChange={(event) => setMessageContent(event.target.value)}
+                onKeyDown={(event) => {
+                    if (event.code === "Enter") {
+
+                        handleMessageContentSubmit()
+                        setMessageContent("");
+                        setRefresh(!refresh);
+                    }
+                }}
+            ></input>
+            <IconButton onClick={() => {
+                handleMessageContentSubmit()
+                setRefresh(!refresh)
+            }}>
                 <SendIcon />
             </IconButton>
 

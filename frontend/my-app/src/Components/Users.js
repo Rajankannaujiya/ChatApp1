@@ -17,7 +17,6 @@ function Users() {
   const userData = JSON.parse(localStorage.getItem("userData"));
   const navigate = useNavigate();
   const [users, setUsers] = useState([]);
-  const [oneOnOneChat,setOneOnOneChat]=useState([]);
   const location = useLocation();
   const { pathname } = location;
   const decodedUrl = decodeURIComponent(pathname);

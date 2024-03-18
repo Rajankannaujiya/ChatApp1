@@ -1,11 +1,9 @@
 import React, { useContext } from 'react';
-import ConversationItem from './ConversationItem';
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Axios from 'axios';
 import { refreshSidebarFun } from "../Features/refreshSidebar.js"
 import { myContext } from "./mainContainer";
-import { toggleTheme } from "../Features/themeSlice";
 import { useSelector, useDispatch } from "react-redux";
 import { dark } from '@mui/material/styles/createPalette';
 
@@ -40,15 +38,22 @@ function Group() {
   }, [refresh])
 
 
-  useEffect(() => {
-    const getgroup = async () => {
-      const response = Axios.get(`http://localhost:5000/getGroups/${chatId}`, {
-        params: { userId: userData.user._id }
-      })
+  // useEffect(() => {
+  //   const getgroup = async () => {
+  //     try{
+  //     const response = await Axios.get(`http://localhost:5000/getGroups`, {
+  //       params: {chatId:chatId, userId: userData.user._id }
+  //     })
 
-      console.log("groups are", (await response).data)
-    }
-  }, [userData.user._id, chatId])
+  //     console.log("groups are", response.data.existingGroup)
+  //     console.log("groups chats", response.data.chat)
+  //   }
+  //   catch(err){
+  //     console.log("error has been occured",err);
+  //   }
+  // };
+  // getgroup();
+  // }, [userData.user._id, chatId])
 
   return (
     <div
@@ -68,7 +73,7 @@ function Group() {
 
                   try {
                     const response = await Axios.post(`http://localhost:5000/createGroupChat/${groupId}?userId=${userData.user._id}`);
-                    console.log(response.data.fullChat)
+                    console.log("fullchat is this one",response.data.fullChat)
                     
                     dispatch(refreshSidebarFun());
                     navigate(

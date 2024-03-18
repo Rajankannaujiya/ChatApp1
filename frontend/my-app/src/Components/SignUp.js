@@ -92,7 +92,7 @@ function SignUp() {
                             value={users.email}
                             onChange={handleInputs} />
                     </div>
-                    <div class="form">
+                    <div className="form">
                         <label htmlFor="password">Password</label>
                         <input type="password" className="form-input" name="password" placeholder="Enter the password"
                             autoComplete='off'
