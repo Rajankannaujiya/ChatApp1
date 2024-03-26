@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import './LoginSignUp.css';
-import googleLogo from './google.png';
-import githubLogo from './github.png';
 import Toaster from './Toaster';
 // import { Route, redirect } from 'react-router-dom';
 import Axios from 'axios';
@@ -102,15 +100,6 @@ function Login() {
                     <button type="submit" className="button" onClick={(event) => postLoginData(event)}>Login</button>
                 </form>
 
-                <div className="Authentication">
-                    <a className="button google" href="/auth/google" role="button">
-                        <img src={googleLogo} alt='google logo' className='logo' /> Sign In with Google
-                    </a>
-
-                    <a className="button github" href="/auth/github" role="button">
-                        <img src={githubLogo} alt='github logo' className='logo' /> Sign In with Github
-                    </a>
-                </div>
             </div>
             <div>
                 <div className='Question'>

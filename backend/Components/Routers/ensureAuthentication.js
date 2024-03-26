@@ -1,3 +1,4 @@
+
 import Users from "../Schema/Users.js";
 
 
@@ -9,7 +10,7 @@ const ensureAuthenticated = async (req, res, next) => {
     // Check if userId is present
     if (!userId) {
       return res.status(400).json({ error: 'User ID not provided in the request query parameters' });
-    }
+    } 
 
     const foundUser = await Users.findById(userId);
     

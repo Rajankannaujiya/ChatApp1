@@ -359,6 +359,81 @@ div.mainContainer{
     background-color: rgb(103, 248, 144);
     border-radius: 6px;
     border: 8px;
-    bottom: 0px;
+    bottom:  0px;
 
  }
+
+ @media only screen and (min-width: 633px) and (max-width: 900px)  {
+    /* Hide search bar and conversation container in landscape mode */
+    .Sb-SearchBar{
+      display: none;
+    }
+
+    .Sb-SubHeader{
+        width: fit-content;
+        margin: 0;
+        padding: 1px;
+    }
+    .sideBar-container{
+        width: 250px;
+    }
+    .mainContainer {
+        height: 100vh !important;
+        width: 100vw !important;
+    }
+    /* Adjust layout for smaller screens */
+   
+     .other-icons {
+      display: flex;
+      flex-direction: row;
+    }
+  
+    /* Ensure containers take full width */
+    .chatArea-container,
+    .onlineUserContainer,
+    .user,
+    .group,
+    .Conversation-Container {
+      flex: 1;
+    }
+  }
+
+  @media only screen and (max-width:632px){
+    .Sb-SearchBar{
+        display: none;
+      }
+
+
+    .Sb-SubHeader{
+        width: fit-content;
+        margin: 0;
+        padding: 1px;
+    }
+
+    .other-icons {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sideBar-container{
+        width: auto;
+        
+    }
+      .mainContainer {
+        height: 100vh !important;
+        width: 100vw !important;
+    }
+
+      .chatArea-container,
+      .onlineUserContainer,
+      .user,
+      .group,
+      .Conversation-Container {
+       width: 100%;
+
+
+      }
+  }
+  
+
+  

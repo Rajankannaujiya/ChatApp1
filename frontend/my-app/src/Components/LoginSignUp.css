@@ -95,3 +95,25 @@ a{
     width: 20px;
     height: 20px;
 }
+
+@media only screen and (max-width:632px){
+
+    .login,.SignUp {
+        width: 90vw;
+        height: 90vh;
+    }
+
+    .form, .Authentication{
+        margin: 4px auto;
+       text-transform: uppercase;
+       color: rgba(0, 0, 0, 0.909);
+       width: 300px;
+    }
+
+    .form-input{
+        margin: 2px;
+        padding: 8px;
+        border-radius: 8px;
+        width: -webkit-fill-available;
+    }
+}

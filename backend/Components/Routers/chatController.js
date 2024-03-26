@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import expressAsyncHandler from "express-async-handler";
-import chatSchema from "../Schema/chatSchema";
-import Users from "../Schema/Users";
+import chatSchema from "../Schema/chatSchema.js";
+import Users from "../Schema/Users.js";
 
 const accesschat= expressAsyncHandler(async(req,res)=>{
     const {userId}=req.body;

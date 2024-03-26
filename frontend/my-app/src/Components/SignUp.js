@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import './LoginSignUp.css';
-import googleLogo from './google.png';
-import githubLogo from './github.png';
 import Axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Backdrop, CircularProgress } from "@mui/material";
@@ -108,16 +106,6 @@ function SignUp() {
                     </div>
                     <button type="submit" className="button" onClick={postData}>SignUp</button>
                 </form>
-
-                <div className="Authentication">
-                    <a className="google" href="/auth/google" role="button">
-                        <img src={googleLogo} alt='google logo' className='logo' /> Sign Up with Google
-                    </a>
-
-                    <a className="github" href="/auth/github" role="button">
-                        <img src={githubLogo} alt='github logo' className='logo' /> Sign Up with Github
-                    </a>
-                </div>
             </div>
             <div>
                 <div className='Question'>

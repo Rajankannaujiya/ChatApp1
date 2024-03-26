@@ -49,6 +49,20 @@ chatRouter.get("/allUser",ensureAuthenticated,async (req, res) => {
 });
 
 
+chatRouter.get("/groupMessages/:groupId",ensureAuthenticated,async(req,res)=>{
+  try{
+    const {groupId}=req.params;
+    const chat = await chatSchema.findOne({ group: groupId }).populate('messages');
+    return res.json(chat.messages)
+
+  }
+  catch(err){
+    console.log("an error have been occured",err);
+    return res.status(500).json({ message: 'Server Error' });
+  }
+})
+
+
 chatRouter.get("/allTheGroups",ensureAuthenticated,async(req,res)=>{
   try {
     const groups = await group.find();
@@ -148,10 +162,6 @@ chatRouter.post('/messages',ensureAuthenticated,  async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
-
-
-
 
 // Route handler for createOrRetrieveChat
 
@@ -481,6 +491,37 @@ chatRouter.patch("/removeMember", async (req, res) => {
     console.error(error);
     return res.status(500).send("Internal Server Error");
   }
+});
+
+
+chatRouter.delete("/deleteMessages/:chatId", ensureAuthenticated, async (req, res) => {
+  const { chatId } = req.params;
+  const userId=req.user._id;
+  if (!mongoose.isValidObjectId(chatId)|| !mongoose.isValidObjectId(userId)) {
+    return res.status(400).json({ error: 'Invalid chatId or userId' });
+  }
+
+  let chat = await chatSchema.findById(chatId);
+
+  if (!chat) {
+    return res.status(404).send("Chat not found");
+  }
+  if(chat.isgroup){
+    if(chat.isgroupAdmin.toString() === userId.toString()){
+      chat.messages.splice(0, chat.messages.length);
+      await chat.save();
+      return res.status(200).json({ message: 'Messages deleted successfully', chat });
+    }
+
+    return res.status(400).send("you must be admin to delete the message");
+  }
+
+  chat.messages.splice(0, chat.messages.length);
+
+  // Save the updated chat
+  await chat.save();
+
+  return res.status(200).json({ message: 'Messages deleted successfully', chat });
 });
 
 export default chatRouter;

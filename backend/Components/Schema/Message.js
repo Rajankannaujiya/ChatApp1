@@ -6,7 +6,6 @@ const messageSchema = new mongoose.Schema({
   content: { type: String, required: true },
   isgroup:{type:Boolean,default:false},
   timestamp: { type: Date, default: Date.now }
-
 });
 
 

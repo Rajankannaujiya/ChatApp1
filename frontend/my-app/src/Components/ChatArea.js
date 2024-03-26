@@ -1,6 +1,4 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
-import MessageSelf from "./MessageSelf";
-import MessageOthers from "./MessageOther";
 import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
 import { IconButton } from "@mui/material";
@@ -8,9 +6,15 @@ import Axios from "axios";
 import { myContext } from "./mainContainer";
 import { useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { io } from "socket.io-client";
+import axios from "axios";
+
+
+const ENDPOINT = "http://localhost:5000";
+var socket;
+
 
 function ChatArea(props) {
-
     const dispatch = useDispatch();
     const lightTheme = useSelector((state) => state.themekey)
 
@@ -22,6 +26,8 @@ function ChatArea(props) {
     const [allMessages, setAllMessages] = useState([]);
     const { refresh, setRefresh } = useContext(myContext);
     const [messageContent, setMessageContent] = useState([]);
+    const [socketConnectionStatus, setSockerConnectionStatus] = useState(false);
+    const [allMessagesCopy, setAllMessagesCopy] = useState([]);
     const location = useLocation();
     const { pathname } = location;
     const decodedUrl = decodeURIComponent(pathname);
@@ -29,9 +35,8 @@ function ChatArea(props) {
     const parts = decodedUrl.split("/");
     const lastPart = parts[parts.length - 1];
     var [chatId, user] = lastPart.split("&");
+    console.log("these are the chatid and user", chatId, user)
 
-
-    
 
 
     useEffect(() => {
@@ -41,7 +46,6 @@ function ChatArea(props) {
                 const response = await Axios.get("http://localhost:5000/allUser", {
                     params: { userId: userData.user._id }
                 });
-                console.log("Data refresh in sidebar ", response.data);
                 setUsers(response.data);
 
             } catch (error) {
@@ -61,8 +65,7 @@ function ChatArea(props) {
                     params: { userId: userData.user._id }
                 });
                 setChat(response.data.chats);
-                // setLoading(false);
-                console.log("chats are", response.data.chats);
+
             } catch (err) {
                 console.log("Error fetching chats:", err);
             }
@@ -76,7 +79,8 @@ function ChatArea(props) {
                 console.log("chat id is", chatId);
                 const response = await Axios.get(`http://localhost:5000/messages/${chatId}?userId=${userData.user._id}`);
                 setAllMessages(response.data.messages);
-                console.log("messages are", response.data.messages)
+                socket.emit("join chat", chatId)
+                setAllMessagesCopy(allMessages)
             } catch (error) {
                 console.error('Error fetching messages:', error);
             }
@@ -85,20 +89,39 @@ function ChatArea(props) {
         if (chatId) {
             fetchData();
         }
-    }, [chatId,userData.user._id]);
+    }, [chatId, userData.user._id, refresh, allMessages]);
+
+
+    useEffect(() => {
+        socket = io(ENDPOINT);
+        socket.emit("setup", userData);
+        setSockerConnectionStatus(!socketConnectionStatus);
+    }, [])
+
+
+    useEffect(() => {
+        socket.on("message recieved", (newMessage) => {
+            if (!allMessagesCopy || allMessagesCopy._id !== newMessage._id) {
+
+            }
+            else {
+                setAllMessages([...allMessages], newMessage)
+            }
+        })
+    })
 
     const handleMessageContentSubmit = async (event) => {
         try {
             // Find the chat with matching chatId
             const chatToUpdate = chat.find(chatItem => chatItem._id === chatId);
-    
+
             if (!chatToUpdate) {
                 console.error("Chat not found for chatId:", chatId);
                 return;
             }
-    
+
             const isgroup = chatToUpdate.isgroup;
-    
+
             let receiver;
             if (isgroup) {
                 // Handle group chat
@@ -108,17 +131,18 @@ function ChatArea(props) {
                 const receiverDetail = users.find(receiver => receiver.username === user);
                 receiver = receiverDetail ? receiverDetail._id : null;
             }
-    
+
             const { data } = await Axios.post(`http://localhost:5000/messages?userId=${userData.user._id}`, {
                 reciever: receiver,
                 content: messageContent,
                 chatId: chatId,
                 isgroup: isgroup
             });
-    
+
             console.log("Message data:", data);
 
             setAllMessages([...allMessages, data]);
+            socket.emit("new messages", data.message.content)
             setMessageContent("");
             // Handle response from backend as needed
         } catch (error) {
@@ -127,12 +151,20 @@ function ChatArea(props) {
         }
     };
 
+    const handleDelete=async(event)=>{
 
+        try {
+            const response = await Axios.delete(`http://localhost:5000/deleteMessages/${chatId}?userId=${userData.user._id}`);
 
-    // Check if chat is an array with length
-    if (Array.isArray(chat) && chat.length > 0) {
-        console.log("chats are", chat);
+            setAllMessages(response.data.chat.messages);
+
+        }
+        catch (error) {
+            console.log("this is the error", error);
+        }
     }
+
+
 
     return (<div className={"chatArea-container" + (lightTheme ? "" : " dark")}>
         <div className={"chatArea-header" + (lightTheme ? "" : " dark")}>
@@ -143,8 +175,11 @@ function ChatArea(props) {
                 <p className="con-Tittle">{user}</p>
                 <p className={"con-timeStamp" + (lightTheme ? "" : " dark")}>{ }</p>
             </div>
-            <IconButton>
-                <DeleteIcon />
+            <IconButton  onClick={() => {
+               handleDelete();
+               setRefresh(!refresh);
+            }}>
+                <DeleteIcon className={(lightTheme ? "" : " dark")}/>
             </IconButton>
         </div>
         <div className={"message-container" + (lightTheme ? "" : " dark")}>
@@ -208,7 +243,7 @@ function ChatArea(props) {
                 handleMessageContentSubmit()
                 setRefresh(!refresh)
             }}>
-                <SendIcon />
+                <SendIcon  className={(lightTheme ? "" : " dark")}/>
             </IconButton>
 
         </div>

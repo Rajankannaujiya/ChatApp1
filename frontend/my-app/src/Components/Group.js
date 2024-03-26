@@ -1,11 +1,10 @@
 import React, { useContext } from 'react';
 import { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate} from 'react-router-dom';
 import Axios from 'axios';
 import { refreshSidebarFun } from "../Features/refreshSidebar.js"
 import { myContext } from "./mainContainer";
 import { useSelector, useDispatch } from "react-redux";
-import { dark } from '@mui/material/styles/createPalette';
 
 function Group() {
 
@@ -13,11 +12,12 @@ function Group() {
   const lightTheme = useSelector((state) => state.themekey);
   const { refresh, setRefresh } = useContext(myContext);
 
-  const { chatId } = useParams();
   const userData = JSON.parse(localStorage.getItem("userData"));
   const navigate = useNavigate();
   const [group, setGroup] = useState([]);
-  
+
+
+
   console.log("groups are in ", group)
 
   if (!userData) {
@@ -35,82 +35,130 @@ function Group() {
       .catch((err) => {
         console.log(err)
       })
-  }, [refresh])
+  }, [refresh,userData.user._id])
 
 
-  // useEffect(() => {
-  //   const getgroup = async () => {
-  //     try{
-  //     const response = await Axios.get(`http://localhost:5000/getGroups`, {
-  //       params: {chatId:chatId, userId: userData.user._id }
-  //     })
 
-  //     console.log("groups are", response.data.existingGroup)
-  //     console.log("groups chats", response.data.chat)
-  //   }
-  //   catch(err){
-  //     console.log("error has been occured",err);
-  //   }
-  // };
-  // getgroup();
-  // }, [userData.user._id, chatId])
+  const [lastMessages, setLastMessages] = useState({});
+
+  const fetchLastMessage = async (groupId) => {
+    console.log(groupId)
+    try {
+      const response = await Axios.get(`http://localhost:5000/groupMessages/${groupId}?userId=${userData.user._id}`);
+      const messages = response.data
+      setRefresh(!refresh)
+
+      if (Array.isArray(messages) && messages.length > 0) {
+        // If messages is an array of messages objects
+        const messageContents = messages.map(message => ({
+          timestamp: message.timestamp,
+          content: message.content
+        }));
+        console.log("message contents:", messageContents);
+        return messageContents;
+      } else if (messages && typeof messages === 'object') {
+        // If messages is a single message object
+        const messageContent = {
+          timestamp: messages.timestamp,
+          content: messages.content
+        };
+        console.log("message content:", messageContent);
+        return [messageContent]; // Return as an array to keep consistent data structure
+      } else {
+        console.log("No messages found or unexpected data structure.");
+        return "No messages found";
+      }
+    } catch (error) {
+      console.error("Error fetching last message for group:", error);
+      return "Error fetching message";
+    }
+  };
+
+  useEffect(() => {
+    const fetchLastMessages = async () => {
+      const messagesPromises = group.map((grp) => {
+        return fetchLastMessage(grp._id);
+      });
+  
+      const messages = await Promise.all(messagesPromises);
+  
+      const messagesMap = {};
+      group.forEach((grp, index) => {
+        messagesMap[grp._id] = messages[index];
+      });
+  
+      setLastMessages(messagesMap);
+    };
+  
+    fetchLastMessages();
+  }, [group]); // eslint-disable-line react-hooks/exhaustive-deps
+  
+
+
+  if (!userData) {
+    console.log("user is not authenticated");
+    navigate("/");
+  }
 
   return (
-    <div
-      className={'group' + (lightTheme ? "" : " dark")}>
+    <div className={'group' + (lightTheme ? "" : " dark")}>
       <div>
         <h1 className={'group-header' + (lightTheme ? "" : " dark")}>Groups</h1>
       </div>
       <div className={"Sb-Conversation" + (lightTheme ? "" : " dark")}>
-        {
-          group.map((group, index) => {
-            console.log(group)
-            return (
-              <div key={index} className={"Conversation-Container" + (lightTheme ? "" : " dark")}
-                onClick={async () => {
-                  const groupId = group._id;
-                  console.log("Creating chat with ", group.name);
+        {group.map((group, index) => (
+          <div key={index} className={"Conversation-Container" + (lightTheme ? "" : " dark")}
+            onClick={async () => {
+              const groupId = group._id;
+              console.log("Creating chat with ", group.name);
 
-                  try {
-                    const response = await Axios.post(`http://localhost:5000/createGroupChat/${groupId}?userId=${userData.user._id}`);
-                    console.log("fullchat is this one",response.data.fullChat)
-                    
-                    dispatch(refreshSidebarFun());
-                    navigate(
-                    "chat/" +
-                    response.data.fullChat._id +
-                    "&" +
-                    (response.data.fullChat.group.name)
-                  )
-                  }
-                  catch (error) {
-                    console.log("an error occur", error);
-                  }
-                }
-                }>
-                <div>
-                  {/* Render either username or name */}
-                  <p className="con-icon">
-                    {group?.name[0]}
+              try {
+                const response = await Axios.post(`http://localhost:5000/createGroupChat/${groupId}?userId=${userData.user._id}`);
+                console.log("fullchat is this one", response.data.fullChat);
+
+                dispatch(refreshSidebarFun());
+                navigate(
+                  "chat/" +
+                  response.data.fullChat._id +
+                  "&" +
+                  (response.data.fullChat.group.name)
+                );
+              } catch (error) {
+                console.log("an error occur", error);
+              }
+            }}>
+            <div>
+              <p className="con-icon">
+                {group?.name[0]}
+              </p>
+            </div>
+            <div>
+              <p className="con-Tittle">{group?.name}</p>
+              {/* Render the last message once it's fetched */}
+
+              {lastMessages[group._id] ? (
+                lastMessages[group._id].length !== 0 ? (
+                  <p className="con-lastMessage">
+                    {lastMessages[group._id][lastMessages[group._id].length - 1].content}
                   </p>
-                </div>
-                <div>
-                  {/* Render either username or name */}
-                  <p className="con-Tittle">{group?.name}</p>
-                  <p className="con-lastMessage">{group?.messages || "hii"}</p>
-                </div>
-                <div>
-                  <p className="con-timeStamp">{group.messages?.timeStamp || "now"}</p>
-                </div>
-              </div>
-            );
-          })
-
-        }
-
+                ) : (
+                  <p className="con-lastMessage">Click here to start message</p>
+                )
+              ) : null}
+            </div>
+            <div>
+            {lastMessages[group._id] ? (
+                lastMessages[group._id].length !== 0 ? (
+                  <p className="con-timeStamp">{lastMessages[group._id] ? new Date(lastMessages[group._id][lastMessages[group._id].length - 1].timestamp).toLocaleDateString() : ""}</p>
+                ) : (
+                  <p className="con-timeStamp"></p>
+                )
+              ) : null}
+            </div>
+          </div>
+        ))}
       </div>
     </div>
-  )
+  );
 }
-
 export default Group;

@@ -1,20 +1,11 @@
-import express, { response } from "express";
-import mongoose from 'mongoose'
-// import expresHandler from "express-async-handler"
-import session from 'express-session';
+import express from "express";
 import ensureAuthenticated from "./ensureAuthentication.js";
 import Users from "../Schema/Users.js";
 import passport from 'passport';
-import chatSchema from "../Schema/chatSchema.js";
-import passportLocalMongoose from 'passport-local-mongoose';
-import cons from "consolidate";
-import { Strategy as LocalStrategy } from 'passport-local';
+
 
 const Router = express.Router();
 
-Router.get("/", async (req, res) => {
-    res.send("hii its connected");
-})
 
 
 Router.get("/fetchAllUsers", ensureAuthenticated, async (req, res) => {
@@ -37,6 +28,7 @@ Router.get("/fetchAllUsers", ensureAuthenticated, async (req, res) => {
 
 Router.post("/register",async(req, res)=> {
     const { username, email, password, confirmPassword } = req.body;
+    console.log(req.body);
 
         if (password !== confirmPassword) {
         return res.status(401).send('Passwords do not match');
@@ -58,7 +50,7 @@ Router.post("/register",async(req, res)=> {
         }
         else{
             passport.authenticate("local")(req,res,function(){
-                res.status(200).send({message:"successful registration",user:req.user})
+                return res.status(200).send({message:"successful registration",user:req.user})
             })
         }
       

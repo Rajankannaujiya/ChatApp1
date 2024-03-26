@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
 import { useState, useEffect } from 'react';
-import ConversationItem from './ConversationItem';
 import Axios from 'axios';
 import { IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
@@ -41,7 +40,6 @@ function Users() {
         const response = await Axios.get("http://localhost:5000/allUser", {
           params: { userId: userData.user._id }
         });
-        console.log("Data refresh in sidebar ", response.data);
         setUsers(response.data);
 
       } catch (error) {
@@ -84,6 +82,7 @@ function Users() {
                     console.log(response.data)
                     
                     dispatch(refreshSidebarFun());
+                    setRefresh(!refresh)
                     navigate(
                     "chat/" +
                     response.data._id +
@@ -108,7 +107,7 @@ function Users() {
                 <div>
                   {/* Render either username or name */}
                   <p className="con-Tittle">{user.username}</p>
-                  <p className="con-lastMessage">{user.messages || "hii"}</p>
+                  <p className="con-lastMessage">{user.messages || "click to start messages"}</p>
                 </div>
                 <div>
                   <p className="con-timeStamp">{user.timeStamp || "now"}</p>
