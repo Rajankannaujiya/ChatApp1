@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node backend/Components/index.js",
     "server": "nodemon backend/Components/index.js",
-    "build": "npm install --legacy-peer-deps && npm run build"
+    "build": "cd backend/Components && npm install --legacy-peer-deps && npm run build && cd ../.. && cd frontend/my-app && npm install --legacy-peer-deps && npm run build && cd ../.."
   },
   "keywords": [
     "mern",
@@ -33,7 +33,6 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "passport-local-mongoose": "^8.0.0",
-    "socket.io": "^4.7.5",
-    "swig": "^1.4.2"
+    "socket.io": "^4.7.5"
   }
 }
