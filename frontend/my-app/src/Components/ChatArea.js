@@ -7,7 +7,6 @@ import { myContext } from "./mainContainer";
 import { useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { io } from "socket.io-client";
-import axios from "axios";
 
 
 const ENDPOINT = "http://localhost:5000";
@@ -15,7 +14,6 @@ var socket;
 
 
 function ChatArea(props) {
-    const dispatch = useDispatch();
     const lightTheme = useSelector((state) => state.themekey)
 
     const messagesEndRef = useRef(null);

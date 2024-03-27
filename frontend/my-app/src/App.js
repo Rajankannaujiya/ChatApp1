@@ -4,14 +4,13 @@ import "./App.css";
 // import { IconButton } from "@mui/material";
 import MainContainer from "./Components/mainContainer";
 import { Routes, Route } from "react-router-dom";
-import Login from "./Components/Login";
-import Welcome from "./Components/Welcome";
-import ChatArea from "./Components/ChatArea";
-import CreateGroup from "./Components/CreateGroup";
-import Group from "./Components/Group";
-import SignUp from "./Components/SignUp";
-import Account from "./Components/Account";
-import Users from "./Components/Users";
+import Login from "./Components/Login.js";
+import Welcome from "./Components/Welcome.js";
+import ChatArea from "./Components/ChatArea.js";
+import CreateGroup from "./Components/CreateGroup.js";
+import Group from "./Components/Group.js";
+import SignUp from "./Components/SignUp.js";
+import Users from "./Components/Users.js";
 
 
 
@@ -34,7 +33,6 @@ function App() {
 
       <Route path="app" element={<MainContainer />}>
         <Route path="welcome" element={<Welcome />} ></Route>
-        <Route path="account" element={<Account/>} ></Route>
         <Route path="users" element={<Users/>} ></Route>
         <Route path="chat/:chatId" element={<ChatArea />} ></Route>
         <Route path="users/chat/:chatId" element={<ChatArea />} ></Route>
