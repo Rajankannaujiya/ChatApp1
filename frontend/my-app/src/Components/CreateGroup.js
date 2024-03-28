@@ -11,7 +11,6 @@ function CreateGroup() {
   const lightTheme=useSelector((state)=>state.themekey)
   const { refresh, setRefresh } = useContext(myContext);
 
-  const [loading,setLoading]=useState(false);
   console.log("Context API : refresh : ", refresh);
   const [clicked,setClicked]=useState(false);
   const [selectedUser, setSelectedUser]=useState([]);
@@ -45,7 +44,6 @@ function CreateGroup() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setLoading(true);
   
     const inputUsers = inputValue.split(',').map(username => username.trim());
   
@@ -84,9 +82,7 @@ function CreateGroup() {
       }
     } catch (error) {
       console.log("An error occurred while submitting the detail", error);
-    } finally {
-      setLoading(false); // Make sure to stop loading indicator
-    }
+    } 
   }
   
 

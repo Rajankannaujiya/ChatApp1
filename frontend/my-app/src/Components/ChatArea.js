@@ -231,7 +231,7 @@ function ChatArea(props) {
                 onKeyDown={(event) => {
                     if (event.code === "Enter") {
 
-                        handleMessageContentSubmit()
+                        handleMessageContentSubmit();
                         setMessageContent("");
                         setRefresh(!refresh);
                     }

@@ -52,9 +52,7 @@ db.once('open', () => {
 });
 
 // Middleware
-app.use(cors({
-  origin: '* '
-}));
+app.use(cors());
 app.use(express.static(__dirname));
 app.use(express.json());
 

@@ -277,6 +277,9 @@ function Sidebar() {
               );
             }
           }
+          else{
+            return null;
+          }
       })}
     </div>
     }
