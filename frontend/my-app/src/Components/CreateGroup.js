@@ -1,16 +1,12 @@
 import React, {useContext,useEffect,useState} from 'react';
-import { IconButton } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
 import { myContext } from "./mainContainer";
-import { toggleTheme } from "../Features/themeSlice";
-import { useSelector,useDispatch } from "react-redux";
+import { useSelector} from "react-redux";
 import Axios from "axios"
 import { useNavigate } from 'react-router-dom';
 
 
 function CreateGroup() {
 
-  const dispatch=useDispatch();
   const navigate=useNavigate();
   const lightTheme=useSelector((state)=>state.themekey)
   const { refresh, setRefresh } = useContext(myContext);
@@ -84,6 +80,7 @@ function CreateGroup() {
         // Optional: Fetch updated chat area data
         // Example:
         // fetchDataForChatArea();
+        setRefresh(!refresh);
       }
     } catch (error) {
       console.log("An error occurred while submitting the detail", error);

@@ -5,7 +5,7 @@ import { IconButton } from "@mui/material";
 import Axios from "axios";
 import { myContext } from "./mainContainer";
 import { useLocation } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector} from "react-redux";
 import { io } from "socket.io-client";
 
 
@@ -94,7 +94,7 @@ function ChatArea(props) {
         socket = io(ENDPOINT);
         socket.emit("setup", userData);
         setSockerConnectionStatus(!socketConnectionStatus);
-    }, [])
+    }, [socketConnectionStatus, userData])
 
 
     useEffect(() => {

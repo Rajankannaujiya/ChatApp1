@@ -13,7 +13,6 @@ import { IconButton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { myContext } from "./mainContainer";
 import { toggleTheme } from "../Features/themeSlice";
-import ChatBubbleIcon from '@mui/icons-material/ChatBubble';
 
 
 
@@ -55,7 +54,7 @@ function Sidebar() {
       }
     };
     fetchChats();
-  }, [refresh]);
+  }, [refresh,userData.user._id]);
 
 
 
@@ -108,7 +107,6 @@ function Sidebar() {
     { windowWidth >=633 &&
     <div className={"Sb-Conversation" + (lightTheme ? "" : " dark")}>
     {Conversations.map((conversation, index) => {
-          
           if (conversation.isgroup === false) {
             console.log("conversation are this one",conversation)
             if (conversation.messages.length === 0) {

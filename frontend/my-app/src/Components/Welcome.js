@@ -1,11 +1,10 @@
 import React,{useContext} from 'react';
 import logo from "../Components/Welcome.jpg";
 import { myContext } from "./mainContainer";
-import { useSelector,useDispatch } from "react-redux";
+import { useSelector} from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 function Welcome() {
-const dispatch=useDispatch();
 const lightTheme=useSelector(state=>state.themekey);
 
 const { refresh, setRefresh } = useContext(myContext);
@@ -17,6 +16,7 @@ const navigate=useNavigate();
 if(!userData){
   console.log("user is not Authenticatd");
   navigate("/");
+  setRefresh(!refresh);
 }
 
 

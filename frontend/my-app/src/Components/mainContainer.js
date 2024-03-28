@@ -1,14 +1,13 @@
-import React, { createContext, useState, useEffect } from "react";
+import React, { createContext, useState} from "react";
 import Sidebar from "./sidebar.js";
 import "./style.css";
 import { Outlet } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 // Import the context if needed
 export const myContext = createContext();
 
 function MainContainer() {
-  const dispatch = useDispatch();
 
   // Access the themekey state from Redux store
   const lightTheme = useSelector(state => state.themekey);
