@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node backend/Components/index.js",
     "server": "nodemon backend/Components/index.js",
-    "build": "cd backend/Components && npm install --legacy-peer-deps && cd ../.. && cd frontend/my-app && npm install --legacy-peer-deps && npm run build  --output public && cd ../.."
+    "build": "cd backend/Components && npm install --legacy-peer-deps && cd ../.. && cd frontend/my-app && npm install --legacy-peer-deps && npm run build && cd ../.. --output public"
   },
   "keywords": [
     "mern",
@@ -16,6 +16,7 @@
   "author": "Rajan",
   "license": "ISC",
   "dependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "body-parser": "^1.20.2",
     "connect-ensure-login": "^0.1.1",
     "consolidate": "^1.0.3",

@@ -5,15 +5,13 @@ import { IconButton } from "@mui/material";
 import Axios from "axios";
 import { myContext } from "./mainContainer";
 import { useLocation } from "react-router-dom";
-import { useSelector} from "react-redux";
+import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
-
-
 const ENDPOINT = "http://localhost:5000";
 var socket;
 
 
-function ChatArea(props) {
+function ChatArea() {
     const lightTheme = useSelector((state) => state.themekey)
 
     const messagesEndRef = useRef(null);
@@ -24,7 +22,7 @@ function ChatArea(props) {
     const [allMessages, setAllMessages] = useState([]);
     const { refresh, setRefresh } = useContext(myContext);
     const [messageContent, setMessageContent] = useState([]);
-    const [socketConnectionStatus, setSockerConnectionStatus] = useState(false);
+    // const [socketConnectionStatus, setSockerConnectionStatus] = useState(false);
     const [allMessagesCopy, setAllMessagesCopy] = useState([]);
     const location = useLocation();
     const { pathname } = location;
@@ -69,12 +67,11 @@ function ChatArea(props) {
             }
         };
         fetchChats();
-    }, [userData.user._id]);
+    }, [userData.user._id, refresh]);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                console.log("chat id is", chatId);
                 const response = await Axios.get(`http://localhost:5000/messages/${chatId}?userId=${userData.user._id}`);
                 setAllMessages(response.data.messages);
                 socket.emit("join chat", chatId)
@@ -87,14 +84,36 @@ function ChatArea(props) {
         if (chatId) {
             fetchData();
         }
-    }, [chatId, userData.user._id, refresh, allMessages]);
+    }, [refresh, chatId, userData.user._id, allMessages]);
 
 
     useEffect(() => {
-        socket = io(ENDPOINT);
-        socket.emit("setup", userData);
-        setSockerConnectionStatus(!socketConnectionStatus);
-    }, [socketConnectionStatus, userData])
+        const setConnection =async()=>{
+        try {
+            socket =  io(ENDPOINT, {
+                cors: {
+                    origin: "*",
+                    credentials: true
+                }, 
+            },{transports: ['websocket']})
+            // socket.emit("setup", userData);
+            socket.on("connection", () => {
+                socket.emit("setup", userData);
+            })
+            socket.on("connect_error", (err) => {
+                console.log(err.message);
+    
+                // some additional description, for exle the status code of the initial HTTP response
+                console.log(err.description);
+    
+                console.log(err.context);
+            });
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    setConnection();
+    }, [userData,refresh])
 
 
     useEffect(() => {
@@ -109,6 +128,7 @@ function ChatArea(props) {
     })
 
     const handleMessageContentSubmit = async (event) => {
+
         try {
             // Find the chat with matching chatId
             const chatToUpdate = chat.find(chatItem => chatItem._id === chatId);
@@ -137,11 +157,11 @@ function ChatArea(props) {
                 isgroup: isgroup
             });
 
-            console.log("Message data:", data);
-
-            setAllMessages([...allMessages, data]);
-            socket.emit("new messages", data.message.content)
-            setMessageContent("");
+            if (data) {
+                setAllMessages([...allMessages, data]);
+                socket.emit("new messages", data.message.content)
+                setMessageContent("");
+            }
             // Handle response from backend as needed
         } catch (error) {
             console.error("An error occurred while sending the message:", error);
@@ -149,7 +169,7 @@ function ChatArea(props) {
         }
     };
 
-    const handleDelete=async(event)=>{
+    const handleDelete = async (event) => {
 
         try {
             const response = await Axios.delete(`http://localhost:5000/deleteMessages/${chatId}?userId=${userData.user._id}`);
@@ -173,11 +193,11 @@ function ChatArea(props) {
                 <p className="con-Tittle">{user}</p>
                 <p className={"con-timeStamp" + (lightTheme ? "" : " dark")}>{ }</p>
             </div>
-            <IconButton  onClick={() => {
-               handleDelete();
-               setRefresh(!refresh);
+            <IconButton onClick={() => {
+                handleDelete();
+                setRefresh(!refresh);
             }}>
-                <DeleteIcon className={(lightTheme ? "" : " dark")}/>
+                <DeleteIcon className={(lightTheme ? "" : " dark")} />
             </IconButton>
         </div>
         <div className={"message-container" + (lightTheme ? "" : " dark")}>
@@ -230,7 +250,6 @@ function ChatArea(props) {
                 onChange={(event) => setMessageContent(event.target.value)}
                 onKeyDown={(event) => {
                     if (event.code === "Enter") {
-
                         handleMessageContentSubmit();
                         setMessageContent("");
                         setRefresh(!refresh);
@@ -241,7 +260,7 @@ function ChatArea(props) {
                 handleMessageContentSubmit()
                 setRefresh(!refresh)
             }}>
-                <SendIcon  className={(lightTheme ? "" : " dark")}/>
+                <SendIcon className={(lightTheme ? "" : " dark")} />
             </IconButton>
 
         </div>

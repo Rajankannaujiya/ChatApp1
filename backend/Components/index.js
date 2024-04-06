@@ -131,10 +131,10 @@ const io = new SocketIOServer(server, {
 });
 
 
-io.on("connection", (socket) => {
+io.on("connect", (socket) => {
 
   socket.on("setup", (userData) => {
-    socket.join(userData._id);
+    socket.join(userData.user._id);
     socket.emit("connected");
   })
 
@@ -154,9 +154,14 @@ io.on("connection", (socket) => {
     });
   });
 
+
+  socket.on("connect_error", (err) => {
+    console.log("error", err);
+  });
   // Handle socket events here
 
-  socket.off("setup", () => {
-    socket.leave(userData.user._id);
+  socket.off("setup", (userData) => {
+   console.log("user is disconnected")
+   socket.leave(userData.user._id);
   });
 });

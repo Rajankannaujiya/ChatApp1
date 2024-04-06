@@ -17,9 +17,6 @@ function Group() {
   const [group, setGroup] = useState([]);
 
 
-
-  console.log("groups are in ", group)
-
   if (!userData) {
     console.log("user is not authenticate");
     navigate("/");
@@ -29,7 +26,7 @@ function Group() {
     Axios.get("http://localhost:5000/allTheGroups", {
       params: { userId: userData.user._id }
     }).then((response) => {
-      console.log(response.data)
+      // console.log(response.data)
       setGroup(response.data)
     })
       .catch((err) => {
@@ -42,19 +39,18 @@ function Group() {
   const [lastMessages, setLastMessages] = useState({});
 
   const fetchLastMessage = async (groupId) => {
-    console.log(groupId)
     try {
       const response = await Axios.get(`http://localhost:5000/groupMessages/${groupId}?userId=${userData.user._id}`);
       const messages = response.data
-      setRefresh(!refresh)
 
       if (Array.isArray(messages) && messages.length > 0) {
+        
         // If messages is an array of messages objects
         const messageContents = messages.map(message => ({
           timestamp: message.timestamp,
           content: message.content
         }));
-        console.log("message contents:", messageContents);
+        // console.log("message contents:", messageContents);
         return messageContents;
       } else if (messages && typeof messages === 'object') {
         // If messages is a single message object
@@ -62,10 +58,10 @@ function Group() {
           timestamp: messages.timestamp,
           content: messages.content
         };
-        console.log("message content:", messageContent);
+        // console.log("message content:", messageContent);
         return [messageContent]; // Return as an array to keep consistent data structure
       } else {
-        console.log("No messages found or unexpected data structure.");
+        // console.log("No messages found or unexpected data structure.");
         return "No messages found";
       }
     } catch (error) {
@@ -88,15 +84,15 @@ function Group() {
       });
   
       setLastMessages(messagesMap);
+      setRefresh(!refresh)
     };
   
     fetchLastMessages();
-  }, [group]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [refresh]); // eslint-disable-line react-hooks/exhaustive-deps
   
 
 
   if (!userData) {
-    console.log("user is not authenticated");
     navigate("/");
   }
 
@@ -106,17 +102,18 @@ function Group() {
         <h1 className={'group-header' + (lightTheme ? "" : " dark")}>Groups</h1>
       </div>
       <div className={"Sb-Conversation" + (lightTheme ? "" : " dark")}>
-        {group.map((group, index) => (
+
+        {
+          group.map((group, index) => (
           <div key={index} className={"Conversation-Container" + (lightTheme ? "" : " dark")}
             onClick={async () => {
               const groupId = group._id;
-              console.log("Creating chat with ", group.name);
 
               try {
                 const response = await Axios.post(`http://localhost:5000/createGroupChat/${groupId}?userId=${userData.user._id}`);
-                console.log("fullchat is this one", response.data.fullChat);
 
                 dispatch(refreshSidebarFun());
+                
                 navigate(
                   "chat/" +
                   response.data.fullChat._id +
