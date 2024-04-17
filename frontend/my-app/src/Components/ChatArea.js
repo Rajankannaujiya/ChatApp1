@@ -31,7 +31,7 @@ function ChatArea() {
     const parts = decodedUrl.split("/");
     const lastPart = parts[parts.length - 1];
     var [chatId, user] = lastPart.split("&");
-    console.log("these are the chatid and user", chatId, user)
+    // console.log("these are the chatid and user", chatId, user)
 
 
 
@@ -39,7 +39,7 @@ function ChatArea() {
         const fetchData = async () => {
             try {
                 // Make the GET request with Axios, passing the request body
-                const response = await Axios.get("http://localhost:5000/allUser", {
+                const response = await Axios.get("/allUser", {
                     params: { userId: userData.user._id }
                 });
                 setUsers(response.data);
@@ -57,7 +57,7 @@ function ChatArea() {
         const fetchChats = async () => {
             // setLoading(true);
             try {
-                const response = await Axios.get("http://localhost:5000/fetchChats", {
+                const response = await Axios.get("/fetchChats", {
                     params: { userId: userData.user._id }
                 });
                 setChat(response.data.chats);
@@ -72,7 +72,7 @@ function ChatArea() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await Axios.get(`http://localhost:5000/messages/${chatId}?userId=${userData.user._id}`);
+                const response = await Axios.get(`/messages/${chatId}?userId=${userData.user._id}`);
                 setAllMessages(response.data.messages);
                 socket.emit("join chat", chatId)
                 setAllMessagesCopy(allMessages)
@@ -90,12 +90,11 @@ function ChatArea() {
     useEffect(() => {
         const setConnection =async()=>{
         try {
-            socket =  io(ENDPOINT, {
+            socket =  io(ENDPOINT, {  
                 cors: {
-                    origin: "*",
-                    credentials: true
-                }, 
-            },{transports: ['websocket']})
+                origin: "*",
+                credentials: true
+              },transports : ['websocket'] });
             // socket.emit("setup", userData);
             socket.on("connection", () => {
                 socket.emit("setup", userData);
@@ -150,7 +149,7 @@ function ChatArea() {
                 receiver = receiverDetail ? receiverDetail._id : null;
             }
 
-            const { data } = await Axios.post(`http://localhost:5000/messages?userId=${userData.user._id}`, {
+            const { data } = await Axios.post(`/messages?userId=${userData.user._id}`, {
                 reciever: receiver,
                 content: messageContent,
                 chatId: chatId,
@@ -172,7 +171,7 @@ function ChatArea() {
     const handleDelete = async (event) => {
 
         try {
-            const response = await Axios.delete(`http://localhost:5000/deleteMessages/${chatId}?userId=${userData.user._id}`);
+            const response = await Axios.delete(`/deleteMessages/${chatId}?userId=${userData.user._id}`);
 
             setAllMessages(response.data.chat.messages);
 
@@ -206,19 +205,19 @@ function ChatArea() {
 
                 .map((message, index) => {
                     const sender = message.sender;
-                    console.log("sender", sender)
+                    // console.log("sender", sender)
                     const self_id = userData.user._id;
                     if (sender === self_id) {
-                        console.log("I sent it ", sender);
-                        return <div className="self-message-container" key={index}>
+                        // console.log("I sent it ", sender);
+                        return <div className={"self-message-container" + (lightTheme ? "" : " dark")} key={index}>
                             <div className="messageBox">
                                 <div className="self-text-content">
-                                    <p className="con-Title">{userData.user.username}</p>
-                                    <p className="con-self-lastMessage">{message?.content}</p>
+                                    <p className={"con-Title" +  (lightTheme ? "" : " darktext")}>{userData.user.username}</p>
+                                    <p className={"con-self-lastMessage" + (lightTheme ? "" : " darktext")}>{message?.content}</p>
                                     {message.timestamp ? (
-                                        <p className="self-timeStamp">{new Date(message.timestamp).toLocaleDateString()}</p>
+                                        <p className={"self-timeStamp" + (lightTheme ? "" : " darktext")}>{new Date(message.timestamp).toLocaleDateString()}</p>
                                     ) : (
-                                        <p className="self-timeStamp"> now</p>
+                                        <p className={"self-timeStamp" + (lightTheme ? "" : " darktext")}> now</p>
                                     )}
                                 </div>
                             </div>
@@ -228,15 +227,15 @@ function ChatArea() {
                     else {
                         // console.log("Someone Sent it");
                         return (<div className="other-message-container" key={index}>
-                            <div className="conversation-container">
-                                <p className="con-icon">     {message ? user[0] : ""}</p>
+                            <div className={"conversation-container" + (lightTheme ? "" : " dark")}>
+                                <p className={"con-icon" + (lightTheme ? "" : " dark")}>     {message ? user[0] : ""}</p>
                                 <div className="other-text-content">
-                                    <p className="con-Title">{message ? user : ""}</p>
-                                    <p className="con-lastMessage">{message ? message.content : ""}</p>
+                                    <p className={"con-Title" +(lightTheme ? "" : " darktext")}>{message ? user : ""}</p>
+                                    <p className={"con-lastMessage" +(lightTheme ? "" : " darktext")}>{message ? message.content : ""}</p>
                                     {message.timestamp ? (
-                                        <p className="self-timeStamp">{new Date(message.timestamp).toLocaleDateString()}</p>
+                                        <p className={"self-timeStamp" +(lightTheme ? "" : " darktext")}>{new Date(message.timestamp).toLocaleDateString()}</p>
                                     ) : (
-                                        <p className="self-timeStamp"> now</p>
+                                        <p className={"self-timeStamp" + (lightTheme ? "" : " darktext")}> now</p>
                                     )}
                                 </div>
                             </div>

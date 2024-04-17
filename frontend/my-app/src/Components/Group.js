@@ -23,7 +23,7 @@ function Group() {
   }
 
   useEffect(() => {
-    Axios.get("http://localhost:5000/allTheGroups", {
+    Axios.get("/allTheGroups", {
       params: { userId: userData.user._id }
     }).then((response) => {
       // console.log(response.data)
@@ -32,7 +32,7 @@ function Group() {
       .catch((err) => {
         console.log(err)
       })
-  }, [refresh,userData.user._id])
+  }, [group,userData.user._id])
 
 
 
@@ -40,7 +40,7 @@ function Group() {
 
   const fetchLastMessage = async (groupId) => {
     try {
-      const response = await Axios.get(`http://localhost:5000/groupMessages/${groupId}?userId=${userData.user._id}`);
+      const response = await Axios.get(`/groupMessages/${groupId}?userId=${userData.user._id}`);
       const messages = response.data
 
       if (Array.isArray(messages) && messages.length > 0) {
@@ -88,7 +88,7 @@ function Group() {
     };
   
     fetchLastMessages();
-  }, [refresh]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [group]); // eslint-disable-line react-hooks/exhaustive-deps
   
 
 
@@ -110,7 +110,7 @@ function Group() {
               const groupId = group._id;
 
               try {
-                const response = await Axios.post(`http://localhost:5000/createGroupChat/${groupId}?userId=${userData.user._id}`);
+                const response = await Axios.post(`/createGroupChat/${groupId}?userId=${userData.user._id}`);
 
                 dispatch(refreshSidebarFun());
                 

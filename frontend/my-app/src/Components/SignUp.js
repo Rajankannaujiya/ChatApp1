@@ -35,7 +35,7 @@ function SignUp() {
         const { username, email, password, confirmPassword } = users;
     
         try {
-            await Axios.post('http://localhost:5000/register', {
+            await Axios.post('/register', {
                 username,
                 email,
                 password,
@@ -97,7 +97,7 @@ function SignUp() {
                             value={users.password}
                             onChange={handleInputs} />
                     </div>
-                    <div class="form">
+                    <div className="form">
                         <label htmlFor="password">Conform Password</label>
                         <input type="password" className="form-input" name="confirmPassword" placeholder='Please Conform Your Password'
                             autoComplete='off'

@@ -1,5 +1,5 @@
 
-import 'dotenv/config';
+import dotenv from 'dotenv/config'
 import express from "express";
 import cors from "cors";
 import multer from "multer";
@@ -14,14 +14,15 @@ import { Strategy as LocalStrategy } from 'passport-local';
 // import cons from "consolidate";
 import { fileURLToPath, pathToFileURL } from "url";
 import path, { dirname } from "path";
-import env from 'dotenv';
 import chatRouter from './Routers/ChatRouter.js';
 import http from 'http'
 import { Server as SocketIOServer } from 'socket.io';
 import createMemoryStore from "memorystore";
-
+import { Db_name } from './constants.js';
+import cons from 'consolidate';
+// dotenv.config()
+// console.log(process.env)
 var upload = multer();
-env.config()
 
 const fileName = fileURLToPath(import.meta.url);
 
@@ -38,23 +39,27 @@ const store = new MemoryStore({
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-// Connect to MongoDB
-main().catch((err) => console.log(err));
+// connecting to mongodb
 
-async function main() {
-  mongoose.connect('mongodb://127.0.0.1:27017/IndividualChat', {
-    family: 4,
-  });
+async function connectToDB(){
+  try {
+    console.log(`${process.env.MONGO_URI}/${Db_name}`)
+    await mongoose.connect(`${process.env.MONGO_URI}/${Db_name}`)
+    console.log("connected to databases")
+  } catch (error) {
+    console.log("an error has been occured while connecting database", error)
+    throw new Error("an error has been occured ")
+  }
 }
 
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'MongoDB connection error:'));
-db.once('open', () => {
-  console.log('Connected to MongoDB');
-});
-
+connectToDB();
 // Middleware
-app.use(cors());
+app.use(cors(
+  {
+    origin:"*",
+    credentials:true
+  }
+));
 app.use(express.static(__dirname));
 app.use(express.json());
 
@@ -63,7 +68,7 @@ app.use(session({
     maxAge: 60000,
   },
   store: store,
-  secret: process.env.SESSION_SECRET || 'your_secret_here',
+  secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: true,
 }));
@@ -122,7 +127,7 @@ else {
 // Start the server
 const port = process.env.PORT || 5000;
 server.listen(port, () => {
-  console.log(`Server is running on port http://localhost:${port}`);
+  console.log(`Server is running on port :${port}`);
 });
 
 const io = new SocketIOServer(server, {

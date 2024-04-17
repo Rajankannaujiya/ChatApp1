@@ -41,7 +41,7 @@ function Login() {
                     "Content-type": "application/json",
                 }
             }
-            await Axios.post('http://localhost:5000/login', user,config).then((response)=>{
+            await Axios.post('/login', user,config).then((response)=>{
                 // console.log("Login:",response.data);
                 setIslogin({msg:"success", key:Math.random()})
                 setLoading(false);

@@ -37,7 +37,7 @@ function Users() {
     const fetchData = async () => {
       try {
         // Make the GET request with Axios, passing the request body
-        const response = await Axios.get("http://localhost:5000/allUser", {
+        const response = await Axios.get("/allUser", {
           params: { userId: userData.user._id }
         });
         setUsers(response.data);
@@ -78,7 +78,7 @@ function Users() {
                   try {
 
                     console.log("chat id is", chatId);
-                    const response = await Axios.post(`http://localhost:5000/createOrRetrieveChat/${recieverId}?userId=${userData.user._id}`);
+                    const response = await Axios.post(`/createOrRetrieveChat/${recieverId}?userId=${userData.user._id}`);
                     console.log(response.data)
                     
                     dispatch(refreshSidebarFun());

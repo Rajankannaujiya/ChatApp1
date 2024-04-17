@@ -59,7 +59,7 @@ function CreateGroup() {
     console.log("Input IDs:", input);
   
     try {
-      const response = await Axios.post(`http://localhost:5000/createGroup?userId=${userData.user._id}`, {
+      const response = await Axios.post(`/createGroup?userId=${userData.user._id}`, {
         name,
         input
       });
@@ -90,7 +90,7 @@ function CreateGroup() {
     const fetchData = async () => {
       try {
         // Make the GET request with Axios, passing the request body
-        const response = await Axios.get("http://localhost:5000/allUser", {
+        const response = await Axios.get("/allUser", {
           params: { userId: userData.user._id }
         });
         console.log("Data refresh in sidebar ", response.data);
