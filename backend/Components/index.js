@@ -105,24 +105,9 @@ app.use("/", chatRouter)
 
 app.use("", Router)
 
-// ----------------DEPLOYMENT-------------------
-
-const __dirname1 = path.resolve();
-console.log("this is dir1",__dirname1)
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname1, "../../frontend/my-app/build")))
-
-  app.get('*', (req, res) => {
-    res.sendFile(path.resolve(__dirname1,"..","..","frontend","my-app", "build", "index.html"))
-  })
+app.get("/",(req,res)=>{
+  res.send("Hello there")
 }
-else {
-  app.get("/", (req, res) => {
-    res.send("Api running successfully");
-  })
-}
-
-// ----------------DEPLOYMENT-------------------
 
 // Start the server
 const port = process.env.PORT || 5000;
