@@ -7,7 +7,7 @@ import { myContext } from "./mainContainer";
 import { useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { io } from "socket.io-client";
-const ENDPOINT = "http://localhost:5000";
+const ENDPOINT = "https://chat-app1-olive.vercel.app";
 var socket;
 
 
