@@ -103,8 +103,6 @@ app.use((req, res, next) => {
 app.use("/users", Router);
 app.use("/", chatRouter)
 
-app.use("", Router)
-
 // Start the server
 const port = process.env.PORT || 5000;
 server.listen(port, () => {
