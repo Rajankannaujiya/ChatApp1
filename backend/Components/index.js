@@ -105,10 +105,6 @@ app.use("/", chatRouter)
 
 app.use("", Router)
 
-app.get("/",(req,res)=>{
-  res.send("Hello there")
-})
-
 // Start the server
 const port = process.env.PORT || 5000;
 server.listen(port, () => {
