@@ -2,7 +2,7 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
-  "proxy":"http://localhost:5000",
+  "proxy":"https://chat-app1-olive.vercel.app",
   "dependencies": {
     "@babel/core": "^7.24.3",
     "@emotion/react": "^11.11.1",
